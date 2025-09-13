@@ -19,8 +19,17 @@
 CPU new_cpu(void) {
     Registers regs = new_regs();
     FlagRegister flag_reg = new_flag_reg();
-    CPU cpu = {regs, flag_reg};
+    CPU cpu = {regs, flag_reg, 0, {0}};
     return cpu;
+}
+
+void step(CPU *cpu) {
+    uint8_t inst_byte = cpu->memory[cpu->prog_count];
+    Instruction inst = inst_from_byte(inst_byte);
+
+    // TODO: execute should increment the prog_count
+    // according to the length of the instruction.
+    execute(cpu, &inst);
 }
 
 void execute(CPU *cpu, const Instruction *instruction) {

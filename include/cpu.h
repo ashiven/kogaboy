@@ -2,23 +2,26 @@
 
 #include "instructions.h"
 
+#define MEMORY_SIZE 0xFFFF
+
 typedef struct {
     Registers registers;
     FlagRegister flag_reg;
+    uint16_t prog_count;
+    uint8_t memory[MEMORY_SIZE];
 } CPU;
 
 CPU new_cpu(void);
 
 /* Instruction execution */
+void step(CPU *cpu);
 void execute(CPU *cpu, const Instruction *instruction);
 
 /* Register interactions */
 void print_reg(CPU *cpu, enum RegisterName reg);
 void print_regs(CPU *cpu);
-
 uint8_t get_reg(CPU *cpu, enum RegisterName reg);
 void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val);
-
 void update_flags(CPU *cpu, bool zero, bool subtract, bool half_carry, bool carry);
 
 /* Instruction implementations */

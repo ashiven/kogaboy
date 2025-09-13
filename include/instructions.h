@@ -40,6 +40,9 @@ typedef struct {
     uint8_t bit_index;
 } Instruction;
 
+Instruction inst_from_byte(uint8_t byte);
+Instruction pf_inst_from_byte(uint8_t byte);
+
 Instruction new_add(enum RegisterName target);
 Instruction new_addhl(enum RegisterName target);
 Instruction new_adc(enum RegisterName target);

@@ -82,7 +82,7 @@ Instruction new_rrca(void) {
     return rrca;
 }
 
-Instruction new_rrla(void) {
+Instruction new_rlca(void) {
     Instruction rrla = {RLCA, 0, 0};
     return rrla;
 }

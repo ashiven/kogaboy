@@ -337,11 +337,18 @@ void inc(CPU *cpu, enum RegisterName target) {
     uint8_t val = get_reg(cpu, target);
     uint8_t res = val + 1;
 
-    bool zero = false;
-    bool subtract = false;
-    bool half_carry = (val & HBYTE_M) + 1 > HBYTE_M;
-    bool carry = cpu->flag_reg.carry;
-    update_flags(cpu, zero, subtract, half_carry, carry);
+    // Flags are only affected when incrementing
+    // a byte register as opposed to a 2-byte register.
+    // TODO: adjust after adding AF to enum
+    // and look into zero if the values inside of the
+    // registers are actually representations of signed integers
+    if (target < BC) {
+        bool zero = false;
+        bool subtract = false;
+        bool half_carry = (val & HBYTE_M) + 1 > HBYTE_M;
+        bool carry = cpu->flag_reg.carry;
+        update_flags(cpu, zero, subtract, half_carry, carry);
+    }
 
     set_reg(cpu, target, res);  // NOLINT
 }
@@ -350,11 +357,14 @@ void dec(CPU *cpu, enum RegisterName target) {
     uint8_t val = get_reg(cpu, target);
     uint8_t res = val - 1;
 
-    bool zero = res == 0;
-    bool subtract = true;
-    bool half_carry = (val & HBYTE_M) >= 1;
-    bool carry = cpu->flag_reg.carry;
-    update_flags(cpu, zero, subtract, half_carry, carry);
+    // TODO: same as above
+    if (target < BC) {
+        bool zero = res == 0;
+        bool subtract = true;
+        bool half_carry = (val & HBYTE_M) >= 1;
+        bool carry = cpu->flag_reg.carry;
+        update_flags(cpu, zero, subtract, half_carry, carry);
+    }
 
     set_reg(cpu, target, res);  // NOLINT
 }

@@ -8,6 +8,7 @@
 #define BBYTE_M 0xFFFF
 #define MSB_IDX 7
 #define PREFIX_BYTE 0xCB
+#define BYTE_SIZE 8
 
 // Source:
 // https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format
@@ -42,6 +43,7 @@ void step(CPU *cpu) {
 
 uint16_t execute(CPU *cpu, const Instruction *instruction) {
     switch (instruction->kind) {
+        /* Arithmetic Instructions */
         case ADD:
             add(cpu, instruction->target);
             return cpu->prog_count + 1;
@@ -96,6 +98,8 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
         case CPL:
             cpl(cpu);
             return cpu->prog_count + 1;
+
+        /* Prefix Instructions */
         case BIT:
             bit(cpu, instruction->bit_index, instruction->target);
             return cpu->prog_count + 2;
@@ -129,7 +133,15 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
         case SWAP:
             swap(cpu, instruction->target);
             return cpu->prog_count + 2;
+
+        /* Jump Instructions */
+        case JUMP:
+            return jump(cpu, instruction->jump_cond);
+        case JUMPHL:
+            return jumphl(cpu);
     }
+
+    return 0;
 }
 
 uint8_t get_reg(CPU *cpu, enum RegisterName reg) {
@@ -723,4 +735,49 @@ void swap(CPU *cpu, enum RegisterName target) {
     update_flags(cpu, zero, subtract, half_carry, carry);
 
     set_reg(cpu, target, res);  // NOLINT
+}
+
+/* Based on the given jump condition, we jump to
+ * the address specified in the following two bytes in memory.
+ *
+ * If the jump condition is not true, we simply increment
+ * the program counter by the size of the instruction.
+ * (1 byte for the instr + 2 bytes for the address)
+ */
+uint16_t jump(CPU *cpu, enum JumpCondition jump_cond) {
+    uint8_t addr_lower = cpu->memory[cpu->prog_count + 1];
+    uint8_t addr_upper = cpu->memory[cpu->prog_count + 2];
+    uint16_t addr = (addr_lower << BYTE_SIZE) | addr_upper;
+
+    switch (jump_cond) {
+        case NOT_ZERO:
+            if (!cpu->flag_reg.zero) {
+                return addr;
+            }
+            break;
+        case ZERO:
+            if (cpu->flag_reg.zero) {
+                return addr;
+            }
+            break;
+        case NOT_CARRY:
+            if (!cpu->flag_reg.carry) {
+                return addr;
+            }
+            break;
+        case CARRY:
+            if (cpu->flag_reg.carry) {
+                return addr;
+            }
+            break;
+        case ALWAYS:
+            return addr;
+    }
+
+    return cpu->prog_count + 3;
+}
+
+uint16_t jumphl(CPU *cpu) {
+    uint16_t addr = get_reg(cpu, HL);
+    return addr;
 }

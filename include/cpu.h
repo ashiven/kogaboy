@@ -54,3 +54,5 @@ void rlc(CPU *cpu, enum RegisterName target);
 void sra(CPU *cpu, enum RegisterName target);
 void sla(CPU *cpu, enum RegisterName target);
 void swap(CPU *cpu, enum RegisterName target);
+uint16_t jump(CPU *cpu, enum JumpCondition jump_cond);
+uint16_t jumphl(CPU *cpu);

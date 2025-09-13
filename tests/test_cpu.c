@@ -2,33 +2,35 @@
 
 #include "../include/cpu.h"
 
+#define BIN(binary) (__extension__ binary)
+
 void test_add(void) {
     CPU cpu = new_cpu();
 
     Instruction Iset = new_set(0, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00000001);
+    assert(cpu.registers.b == BIN(0b00000001));
 
     Instruction Iset2 = new_set(1, B);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b00000011);
+    assert(cpu.registers.b == BIN(0b00000011));
 
     Instruction Iset3 = new_set(2, B);
     execute(&cpu, &Iset3);
-    assert(cpu.registers.b == 0b00000111);
+    assert(cpu.registers.b == BIN(0b00000111));
 
     Instruction Iset4 = new_set(3, B);
     execute(&cpu, &Iset4);
-    assert(cpu.registers.b == 0b00001111);
+    assert(cpu.registers.b == BIN(0b00001111));
 
     Instruction Iset5 = new_set(0, A);
     execute(&cpu, &Iset5);
-    assert(cpu.registers.a == 0b00000001);
+    assert(cpu.registers.a == BIN(0b00000001));
 
     Instruction Iadd = new_add(B);
     execute(&cpu, &Iadd);
-    assert(cpu.registers.a == 0b00010000);
-    assert(cpu.registers.f == 0b00100000);
+    assert(cpu.registers.a == BIN(0b00010000));
+    assert(cpu.registers.f == BIN(0b00100000));
 }
 
 void test_addhl(void) {
@@ -36,11 +38,11 @@ void test_addhl(void) {
 
     Instruction Iset = new_set(3, HL);
     execute(&cpu, &Iset);
-    assert(get_hl(&cpu.registers) == 0b0000000000001000);
+    assert(get_hl(&cpu.registers) == BIN(0b0000000000001000));
 
     Instruction Iaddhl = new_addhl(HL);
     execute(&cpu, &Iaddhl);
-    assert(get_hl(&cpu.registers) == 0b0000000000010000);
+    assert(get_hl(&cpu.registers) == BIN(0b0000000000010000));
 }
 
 void test_adc(void) {
@@ -48,17 +50,17 @@ void test_adc(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Iadc = new_adc(B);
     execute(&cpu, &Iadc);
-    assert(cpu.registers.a == 0b00001001);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.a == BIN(0b00001001));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_sub(void) {
@@ -66,16 +68,16 @@ void test_sub(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(3, A);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.a == 0b00001000);
+    assert(cpu.registers.a == BIN(0b00001000));
 
     Instruction Isub = new_sub(B);
     execute(&cpu, &Isub);
-    assert(cpu.registers.a == 0b00000000);
-    assert(cpu.registers.f == 0b11110000);
+    assert(cpu.registers.a == BIN(0b00000000));
+    assert(cpu.registers.f == BIN(0b11110000));
 }
 
 void test_sbc(void) {
@@ -83,21 +85,21 @@ void test_sbc(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(3, A);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.a == 0b00001000);
+    assert(cpu.registers.a == BIN(0b00001000));
 
     Instruction Iset3 = new_set(4, F);
     execute(&cpu, &Iset3);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Isbc = new_sbc(B);
     execute(&cpu, &Isbc);
-    assert(cpu.registers.a == 0b11111111);
-    assert(cpu.registers.f == 0b01000000);
+    assert(cpu.registers.a == BIN(0b11111111));
+    assert(cpu.registers.f == BIN(0b01000000));
 }
 
 void test_and(void) {
@@ -105,16 +107,16 @@ void test_and(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, A);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.a == 0b00010000);
+    assert(cpu.registers.a == BIN(0b00010000));
 
     Instruction Iand = new_and(B);
     execute(&cpu, &Iand);
-    assert(cpu.registers.a == 0b00000001);
-    assert(cpu.registers.f == 0b00100000);
+    assert(cpu.registers.a == BIN(0b00000001));
+    assert(cpu.registers.f == BIN(0b00100000));
 }
 
 void test_or(void) {
@@ -122,16 +124,16 @@ void test_or(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, A);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.a == 0b00010000);
+    assert(cpu.registers.a == BIN(0b00010000));
 
     Instruction Ior = new_and(B);
     execute(&cpu, &Ior);
-    assert(cpu.registers.a == 0b00000001);
-    assert(cpu.registers.f == 0b00100000);
+    assert(cpu.registers.a == BIN(0b00000001));
+    assert(cpu.registers.f == BIN(0b00100000));
 }
 
 void test_xor(void) {
@@ -139,16 +141,16 @@ void test_xor(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, A);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.a == 0b00010000);
+    assert(cpu.registers.a == BIN(0b00010000));
 
     Instruction Ixor = new_xor(B);
     execute(&cpu, &Ixor);
-    assert(cpu.registers.a == 0b00011000);
-    assert(cpu.registers.f == 0b00100000);
+    assert(cpu.registers.a == BIN(0b00011000));
+    assert(cpu.registers.f == BIN(0b00100000));
 }
 
 void test_cp(void) {
@@ -156,15 +158,15 @@ void test_cp(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(3, A);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.a == 0b00001000);
+    assert(cpu.registers.a == BIN(0b00001000));
 
     Instruction Icp = new_cp(B);
     execute(&cpu, &Icp);
-    assert(cpu.registers.f == 0b11110000);
+    assert(cpu.registers.f == BIN(0b11110000));
 }
 
 void test_inc(void) {
@@ -172,21 +174,21 @@ void test_inc(void) {
 
     Instruction Iset = new_set(3, HL);
     execute(&cpu, &Iset);
-    assert(get_hl(&cpu.registers) == 0b0000000000001000);
+    assert(get_hl(&cpu.registers) == BIN(0b0000000000001000));
 
     Instruction Iinc = new_inc(HL);
     execute(&cpu, &Iinc);
-    assert(get_hl(&cpu.registers) == 0b0000000000001001);
-    assert(cpu.registers.f == 0b00000000);
+    assert(get_hl(&cpu.registers) == BIN(0b0000000000001001));
+    assert(cpu.registers.f == BIN(0b00000000));
 
     Instruction Iset2 = new_set(3, B);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iinc2 = new_inc(B);
     execute(&cpu, &Iinc2);
-    assert(cpu.registers.b == 0b00001001);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.b == BIN(0b00001001));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_dec(void) {
@@ -194,21 +196,21 @@ void test_dec(void) {
 
     Instruction Iset = new_set(3, HL);
     execute(&cpu, &Iset);
-    assert(get_hl(&cpu.registers) == 0b0000000000001000);
+    assert(get_hl(&cpu.registers) == BIN(0b0000000000001000));
 
     Instruction Idec = new_dec(HL);
     execute(&cpu, &Idec);
-    assert(get_hl(&cpu.registers) == 0b0000000000000111);
-    assert(cpu.registers.f == 0b00000000);
+    assert(get_hl(&cpu.registers) == BIN(0b0000000000000111));
+    assert(cpu.registers.f == BIN(0b00000000));
 
     Instruction Iset2 = new_set(3, B);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Idec2 = new_dec(B);
     execute(&cpu, &Idec2);
-    assert(cpu.registers.b == 0b00000111);
-    assert(cpu.registers.f == 0b01100000);
+    assert(cpu.registers.b == BIN(0b00000111));
+    assert(cpu.registers.f == BIN(0b01100000));
 }
 
 void test_ccf(void) {
@@ -216,12 +218,12 @@ void test_ccf(void) {
 
     Instruction Iset = new_set(4, F);
     execute(&cpu, &Iset);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Iccf = new_ccf();
     execute(&cpu, &Iccf);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_scf(void) {
@@ -229,7 +231,7 @@ void test_scf(void) {
 
     Instruction Iscf = new_scf();
     execute(&cpu, &Iscf);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
 }
 
 void test_rra(void) {
@@ -237,12 +239,12 @@ void test_rra(void) {
 
     Instruction Iset = new_set(0, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00000001);
+    assert(cpu.registers.a == BIN(0b00000001));
 
     Instruction Irra = new_rra();
     execute(&cpu, &Irra);
-    assert(cpu.registers.a == 0b00000000);
-    assert(cpu.registers.f == 0b10010000);
+    assert(cpu.registers.a == BIN(0b00000000));
+    assert(cpu.registers.f == BIN(0b10010000));
 }
 
 void test_rla(void) {
@@ -250,17 +252,17 @@ void test_rla(void) {
 
     Instruction Iset = new_set(0, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00000001);
+    assert(cpu.registers.a == BIN(0b00000001));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Irla = new_rla();
     execute(&cpu, &Irla);
-    assert(cpu.registers.a == 0b00000011);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.a == BIN(0b00000011));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_rrca(void) {
@@ -268,12 +270,12 @@ void test_rrca(void) {
 
     Instruction Iset = new_set(0, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00000001);
+    assert(cpu.registers.a == BIN(0b00000001));
 
     Instruction Irrca = new_rrca();
     execute(&cpu, &Irrca);
-    assert(cpu.registers.a == 0b10000000);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.a == BIN(0b10000000));
+    assert(cpu.registers.f == BIN(0b00010000));
 }
 
 void test_rlca(void) {
@@ -281,17 +283,17 @@ void test_rlca(void) {
 
     Instruction Iset = new_set(0, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00000001);
+    assert(cpu.registers.a == BIN(0b00000001));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Irlca = new_rlca();
     execute(&cpu, &Irlca);
-    assert(cpu.registers.a == 0b00000010);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.a == BIN(0b00000010));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_cpl(void) {
@@ -299,12 +301,12 @@ void test_cpl(void) {
 
     Instruction Iset = new_set(0, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00000001);
+    assert(cpu.registers.a == BIN(0b00000001));
 
     Instruction Icpl = new_cpl();
     execute(&cpu, &Icpl);
-    assert(cpu.registers.a == 0b11111110);
-    assert(cpu.registers.f == 0b01100000);
+    assert(cpu.registers.a == BIN(0b11111110));
+    assert(cpu.registers.f == BIN(0b01100000));
 }
 
 void test_bit(void) {
@@ -312,11 +314,11 @@ void test_bit(void) {
 
     Instruction Iset = new_set(3, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00001000);
+    assert(cpu.registers.a == BIN(0b00001000));
 
     Instruction Ibit = new_bit(3, A);
     execute(&cpu, &Ibit);
-    assert(cpu.registers.f == 0b00100000);
+    assert(cpu.registers.f == BIN(0b00100000));
 }
 
 void test_reset(void) {
@@ -324,12 +326,12 @@ void test_reset(void) {
 
     Instruction Iset = new_set(3, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00001000);
+    assert(cpu.registers.a == BIN(0b00001000));
 
     Instruction Ireset = new_reset(3, A);
     execute(&cpu, &Ireset);
-    assert(cpu.registers.a == 0b00000000);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.a == BIN(0b00000000));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_set(void) {
@@ -337,8 +339,8 @@ void test_set(void) {
 
     Instruction Iset = new_set(3, A);
     execute(&cpu, &Iset);
-    assert(cpu.registers.a == 0b00001000);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.a == BIN(0b00001000));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_srl(void) {
@@ -346,16 +348,16 @@ void test_srl(void) {
 
     Instruction Iset = new_set(0, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00000001);
+    assert(cpu.registers.b == BIN(0b00000001));
 
     Instruction Iset2 = new_set(7, B);  // NOLINT
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b10000001);
+    assert(cpu.registers.b == BIN(0b10000001));
 
     Instruction Isrl = new_srl(B);
     execute(&cpu, &Isrl);
-    assert(cpu.registers.b == 0b01000000);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.b == BIN(0b01000000));
+    assert(cpu.registers.f == BIN(0b00010000));
 }
 
 void test_rr(void) {
@@ -363,17 +365,17 @@ void test_rr(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Irr = new_rr(B);
     execute(&cpu, &Irr);
-    assert(cpu.registers.b == 0b10000100);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.b == BIN(0b10000100));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_rl(void) {
@@ -381,17 +383,17 @@ void test_rl(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Irl = new_rl(B);
     execute(&cpu, &Irl);
-    assert(cpu.registers.b == 0b00010001);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.b == BIN(0b00010001));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_rrc(void) {
@@ -399,17 +401,17 @@ void test_rrc(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Irrc = new_rrc(B);
     execute(&cpu, &Irrc);
-    assert(cpu.registers.b == 0b00000100);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.b == BIN(0b00000100));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_rlc(void) {
@@ -417,17 +419,17 @@ void test_rlc(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(4, F);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Irlc = new_rlc(B);
     execute(&cpu, &Irlc);
-    assert(cpu.registers.b == 0b00010000);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.b == BIN(0b00010000));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_sra(void) {
@@ -435,21 +437,21 @@ void test_sra(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(7, B);  // NOLINT
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b10001000);
+    assert(cpu.registers.b == BIN(0b10001000));
 
     Instruction Iset3 = new_set(4, F);
     execute(&cpu, &Iset3);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Isra = new_sra(B);
     execute(&cpu, &Isra);
-    assert(cpu.registers.b == 0b11000100);
-    assert(cpu.registers.f == 0b00000000);
+    assert(cpu.registers.b == BIN(0b11000100));
+    assert(cpu.registers.f == BIN(0b00000000));
 }
 
 void test_sla(void) {
@@ -457,21 +459,21 @@ void test_sla(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(7, B);  // NOLINT
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b10001000);
+    assert(cpu.registers.b == BIN(0b10001000));
 
     Instruction Iset3 = new_set(4, F);
     execute(&cpu, &Iset3);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.f == BIN(0b00010000));
     cpu.flag_reg.carry = true;
 
     Instruction Isla = new_sla(B);
     execute(&cpu, &Isla);
-    assert(cpu.registers.b == 0b00010000);
-    assert(cpu.registers.f == 0b00010000);
+    assert(cpu.registers.b == BIN(0b00010000));
+    assert(cpu.registers.f == BIN(0b00010000));
 }
 
 void test_swap(void) {
@@ -479,15 +481,15 @@ void test_swap(void) {
 
     Instruction Iset = new_set(3, B);
     execute(&cpu, &Iset);
-    assert(cpu.registers.b == 0b00001000);
+    assert(cpu.registers.b == BIN(0b00001000));
 
     Instruction Iset2 = new_set(1, B);
     execute(&cpu, &Iset2);
-    assert(cpu.registers.b == 0b00001010);
+    assert(cpu.registers.b == BIN(0b00001010));
 
     Instruction Iswap = new_swap(B);
     execute(&cpu, &Iswap);
-    assert(cpu.registers.b == 0b10100000);
+    assert(cpu.registers.b == BIN(0b10100000));
 }
 
 int main() {

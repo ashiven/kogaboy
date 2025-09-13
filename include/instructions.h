@@ -18,31 +18,45 @@ enum InstructionKind {  // NOLINT
     SCF,                /*Set carry flag to true*/
     RRA,                /*Bit rotate right register A through carry flag*/
     RLA,                /*Bit rotate left register A through carry flag*/
-    RRCA,               /*Bit rotate right register A not through carry flag*/
-    RLCA,               /*Bit rotate left register A not through carry flag*/
+    RRCA,               /*Bit rotate right register A and set carry flag*/
+    RLCA,               /*Bit rotate left register A and set carry flag*/
     CPL,                /*Toggle every bit of the A register*/
-    BIT,                /*Test whether a specific bit of register A is set*/
+    BIT,                /*Test whether a specific bit of target register is set*/
     RESET,              /*Reset a bit of target to 0*/
     SET,                /*Set a bit of target to 1*/
-    SRL,                /*Bit shift target to the right by 1*/
+    SRL,                /*Logic shift target to the right by 1*/
     RR,                 /*Bit rotate right target through carry flag*/
     RL,                 /*Bit rotate left target through carry flag*/
-    RRC,                /*Bit rotate right target not through carry flag*/
-    RLC,                /*Bit rotate left target not through carry flag*/
+    RRC,                /*Bit rotate right target and set carry flag*/
+    RLC,                /*Bit rotate left target and set carry flag*/
     SRA,                /*Arithmetic shift target to the right by 1*/
     SLA,                /*Arithmetic shift target to the left by 1*/
-    SWAP,               /*swap the upper and lower halfs (4 Bits each) of the target*/
+    SWAP,               /*Swap the upper and lower halfs (4 Bits each) of the target*/
+    JUMP,               /*Jump to 8 or 16 bit-adjusted address based on a condition*/
+    JUMPHL,             /*Jump to the address in register HL*/
 };
 
+enum JumpCondition {  // NOLINT
+    NOT_ZERO,
+    ZERO,
+    NOT_CARRY,
+    CARRY,
+    ALWAYS,
+};
+
+// TODO: embed generic Instruction inside of specific
+// instructions like: ArithInstr, PrefixInstr, JumpInstr, LoadInstr ...
 typedef struct {
     enum InstructionKind kind;
     enum RegisterName target;
     uint8_t bit_index;
+    enum JumpCondition jump_cond;
 } Instruction;
 
 Instruction inst_from_byte(uint8_t byte);
 Instruction pf_inst_from_byte(uint8_t byte);
 
+/* Arithmetic Instructions */
 Instruction new_add(enum RegisterName target);
 Instruction new_addhl(enum RegisterName target);
 Instruction new_adc(enum RegisterName target);
@@ -61,6 +75,8 @@ Instruction new_rla(void);
 Instruction new_rrca(void);
 Instruction new_rlca(void);
 Instruction new_cpl(void);
+
+/* Prefix Instructions - Bits, Shifts, and Rotations */
 Instruction new_bit(uint8_t bit_index, enum RegisterName target);
 Instruction new_reset(uint8_t bit_index, enum RegisterName target);
 Instruction new_set(uint8_t bit_index, enum RegisterName target);
@@ -72,3 +88,7 @@ Instruction new_rlc(enum RegisterName target);
 Instruction new_sra(enum RegisterName target);
 Instruction new_sla(enum RegisterName target);
 Instruction new_swap(enum RegisterName target);
+
+/* Jump Instructions */
+Instruction new_jump(enum JumpCondition jump_cond);
+Instruction new_jumphl(void);

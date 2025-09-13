@@ -19,13 +19,13 @@ const char *reg_name(enum RegisterName reg);
 
 Registers new_regs(void);
 
-uint16_t get_bc(Registers *regs);
+uint16_t get_bc(const Registers *regs);
 void set_bc(Registers *regs, uint16_t val);
 
-uint16_t get_de(Registers *regs);
+uint16_t get_de(const Registers *regs);
 void set_de(Registers *regs, uint16_t val);
 
-uint16_t get_hl(Registers *regs);
+uint16_t get_hl(const Registers *regs);
 void set_hl(Registers *regs, uint16_t val);
 
 typedef struct {

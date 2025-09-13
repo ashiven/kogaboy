@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+// == Inst(kind=ADD, target=A, bit_index=7)
+#define NOT_FOUND_INST {0, 0, 7}
+
 // NOLINTBEGIN
 // Source: https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
 Instruction inst_from_byte(uint8_t byte) {
@@ -243,6 +246,9 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x2F:
             return new_cpl();
     }
+
+    Instruction not_found = NOT_FOUND_INST;
+    return not_found;
 }
 
 Instruction pf_inst_from_byte(uint8_t byte) {
@@ -790,6 +796,9 @@ Instruction pf_inst_from_byte(uint8_t byte) {
         case 0x37:
             return new_swap(A);
     }
+
+    Instruction not_found = NOT_FOUND_INST;
+    return not_found;
 }
 // NOLINTEND
 

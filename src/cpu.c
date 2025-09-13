@@ -7,6 +7,7 @@
 #define BYTE_M 0xFF
 #define BBYTE_M 0xFFFF
 #define MSB_IDX 7
+#define PREFIX_BYTE 0xCB
 
 // Source:
 // https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format
@@ -25,102 +26,109 @@ CPU new_cpu(void) {
 
 void step(CPU *cpu) {
     uint8_t inst_byte = cpu->memory[cpu->prog_count];
-    Instruction inst = inst_from_byte(inst_byte);
 
-    // TODO: execute should increment the prog_count
-    // according to the length of the instruction.
-    execute(cpu, &inst);
+    Instruction inst;
+
+    // Prefix instructions start with 0xCB
+    if (inst_byte == PREFIX_BYTE) {
+        inst_byte = cpu->memory[cpu->prog_count + 1];
+        inst = pf_inst_from_byte(inst_byte);
+    } else {
+        inst = inst_from_byte(inst_byte);
+    }
+
+    cpu->prog_count = execute(cpu, &inst);
 }
 
-void execute(CPU *cpu, const Instruction *instruction) {
+uint16_t execute(CPU *cpu, const Instruction *instruction) {
     switch (instruction->kind) {
         case ADD:
             add(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case ADDHL:
             addhl(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case ADC:
             adc(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case SUB:
             sub(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case SBC:
             sbc(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case AND:
             and_(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case OR:
             or_(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case XOR:
             xor_(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case CP:
             cp(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case INC:
             inc(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case DEC:
             dec(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 1;
         case CCF:
             ccf(cpu);
-            break;
+            return cpu->prog_count + 1;
         case SCF:
             scf(cpu);
-            break;
+            return cpu->prog_count + 1;
         case RRA:
             rra(cpu);
-            break;
+            return cpu->prog_count + 1;
         case RLA:
             rla(cpu);
-            break;
+            return cpu->prog_count + 1;
         case RRCA:
             rrca(cpu);
-            break;
+            return cpu->prog_count + 1;
         case RLCA:
             rlca(cpu);
-            break;
+            return cpu->prog_count + 1;
         case CPL:
             cpl(cpu);
-            break;
+            return cpu->prog_count + 1;
         case BIT:
             bit(cpu, instruction->bit_index, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case RESET:
             reset(cpu, instruction->bit_index, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case SET:
             set(cpu, instruction->bit_index, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case SRL:
             srl(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case RR:
             rr(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case RL:
             rl(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case RRC:
             rrc(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case RLC:
             rlc(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case SRA:
             sra(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case SLA:
             sla(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
         case SWAP:
             swap(cpu, instruction->target);
-            break;
+            return cpu->prog_count + 2;
     }
 }
 

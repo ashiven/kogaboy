@@ -40,21 +40,27 @@ Registers new_regs(void) {
     return regs;
 }
 
-uint16_t get_bc(Registers *regs) { return (uint16_t)(regs->b) << BYTE_SIZE | (uint16_t)regs->c; }
+uint16_t get_bc(const Registers *regs) {
+    return (uint16_t)(regs->b) << BYTE_SIZE | (uint16_t)regs->c;
+}
 
 void set_bc(Registers *regs, uint16_t val) {
     regs->b = (uint8_t)((val & UPPER_M) >> BYTE_SIZE);
     regs->c = (uint8_t)(val & LOWER_M);
 }
 
-uint16_t get_de(Registers *regs) { return (uint16_t)(regs->d) << BYTE_SIZE | (uint16_t)regs->e; }
+uint16_t get_de(const Registers *regs) {
+    return (uint16_t)(regs->d) << BYTE_SIZE | (uint16_t)regs->e;
+}
 
 void set_de(Registers *regs, uint16_t val) {
     regs->d = (uint8_t)((val & UPPER_M) >> BYTE_SIZE);
     regs->e = (uint8_t)(val & LOWER_M);
 }
 
-uint16_t get_hl(Registers *regs) { return (uint16_t)(regs->h) << BYTE_SIZE | (uint16_t)regs->l; }
+uint16_t get_hl(const Registers *regs) {
+    return (uint16_t)(regs->h) << BYTE_SIZE | (uint16_t)regs->l;
+}
 
 void set_hl(Registers *regs, uint16_t val) {
     regs->h = (uint8_t)((val & UPPER_M) >> BYTE_SIZE);

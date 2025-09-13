@@ -15,7 +15,7 @@ CPU new_cpu(void);
 
 /* Instruction execution */
 void step(CPU *cpu);
-void execute(CPU *cpu, const Instruction *instruction);
+uint16_t execute(CPU *cpu, const Instruction *instruction);
 
 /* Register interactions */
 void print_reg(CPU *cpu, enum RegisterName reg);

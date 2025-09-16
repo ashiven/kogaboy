@@ -77,7 +77,7 @@ void test_sub(void) {
     Instruction Isub = new_sub(B);
     execute(&cpu, &Isub);
     assert(cpu.registers.a == BIN(0b00000000));
-    assert(cpu.registers.f == BIN(0b11110000));
+    assert(cpu.registers.f == BIN(0b11000000));
 }
 
 void test_sbc(void) {
@@ -99,7 +99,7 @@ void test_sbc(void) {
     Instruction Isbc = new_sbc(B);
     execute(&cpu, &Isbc);
     assert(cpu.registers.a == BIN(0b11111111));
-    assert(cpu.registers.f == BIN(0b01000000));
+    assert(cpu.registers.f == BIN(0b01110000));
 }
 
 void test_and(void) {
@@ -166,7 +166,7 @@ void test_cp(void) {
 
     Instruction Icp = new_cp(B);
     execute(&cpu, &Icp);
-    assert(cpu.registers.f == BIN(0b11110000));
+    assert(cpu.registers.f == BIN(0b11000000));
 }
 
 void test_inc(void) {
@@ -491,6 +491,8 @@ void test_swap(void) {
     execute(&cpu, &Iswap);
     assert(cpu.registers.b == BIN(0b10100000));
 }
+
+// TODO: test cases for jump instructions, load instructions, and call instructions.
 
 int main() {
     test_add();

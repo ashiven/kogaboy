@@ -135,10 +135,42 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
             return cpu->prog_count + 2;
 
         /* Jump Instructions */
-        case JUMP:
+        case JP:
             return jump(cpu, instruction->jump_cond);
-        case JUMPHL:
+        case JPHL:
             return jumphl(cpu);
+
+        /* Load Instructions */
+        case LD_REG:
+            ld_reg(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 1;
+        case LD_D8:
+            ld_d8(cpu, instruction->ld_target);
+            return cpu->prog_count + 2;
+        case LD_D16:
+            ld_d16(cpu, instruction->ld_target);
+            return cpu->prog_count + 3;
+        case LD_D8_IND:
+            ld_d8_ind(cpu);
+            return cpu->prog_count + 2;
+        case LD_IND:
+            ld_ind(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 1;
+        case LD_ADDR:
+            ld_addr(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 3;
+        case LD_INC:
+            ld_inc(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 1;
+        case LD_DEC:
+            ld_dec(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 1;
+        case LDH_IND:
+            ldh_ind(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 2;
+        case LDH_ADDR:
+            ldh_addr(cpu, instruction->ld_target, instruction->ld_source);
+            return cpu->prog_count + 2;
     }
 
     return 0;
@@ -232,6 +264,28 @@ void update_flags(CPU *cpu, bool zero, bool subtract, bool half_carry, bool carr
     cpu->registers.f = flag_reg_to_byte(&cpu->flag_reg);
 }
 
+uint16_t read_addr(CPU *cpu) {
+    uint8_t addr_lower = cpu->memory[cpu->prog_count + 1];
+    uint8_t addr_upper = cpu->memory[cpu->prog_count + 2];
+    uint16_t addr = ((uint16_t)addr_upper << BYTE_SIZE) | (uint16_t)addr_lower;
+
+    return addr;
+}
+
+uint8_t read_byte(CPU *cpu) {
+    uint8_t byte = cpu->memory[cpu->prog_count + 1];
+
+    return byte;
+}
+
+uint16_t read_bbyte(CPU *cpu) {
+    uint8_t bbyte_lower = cpu->memory[cpu->prog_count + 1];
+    uint8_t bbyte_upper = cpu->memory[cpu->prog_count + 2];
+    uint16_t bbyte = ((uint16_t)bbyte_upper << BYTE_SIZE) | (uint16_t)bbyte_lower;
+
+    return bbyte;
+}
+
 void add(CPU *cpu, enum RegisterName target) {
     uint8_t acc = get_reg(cpu, A);
     uint8_t val = get_reg(cpu, target);
@@ -286,8 +340,8 @@ void sub(CPU *cpu, enum RegisterName target) {
 
     bool zero = res == 0;
     bool subtract = true;
-    bool half_carry = (acc & HBYTE_M) >= (val & HBYTE_M);
-    bool carry = acc >= val;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M);
+    bool carry = acc < val;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
     set_reg(cpu, A, res);
@@ -301,8 +355,8 @@ void sbc(CPU *cpu, enum RegisterName target) {
 
     bool zero = res == 0;
     bool subtract = true;
-    bool half_carry = (acc & HBYTE_M) >= (val & HBYTE_M) + (car & HBYTE_M);
-    bool carry = acc >= (val + car);
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M) + (car & HBYTE_M);
+    bool carry = acc < (val + car);
     update_flags(cpu, zero, subtract, half_carry, carry);
 
     set_reg(cpu, A, res);
@@ -357,8 +411,8 @@ void cp(CPU *cpu, enum RegisterName target) {
 
     bool zero = res == 0;
     bool subtract = true;
-    bool half_carry = (acc & HBYTE_M) >= (val & HBYTE_M);
-    bool carry = acc >= val;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M);
+    bool carry = acc < val;
     update_flags(cpu, zero, subtract, half_carry, carry);
 }
 
@@ -745,9 +799,7 @@ void swap(CPU *cpu, enum RegisterName target) {
  * (1 byte for the instr + 2 bytes for the address)
  */
 uint16_t jump(CPU *cpu, enum JumpCondition jump_cond) {
-    uint8_t addr_lower = cpu->memory[cpu->prog_count + 1];
-    uint8_t addr_upper = cpu->memory[cpu->prog_count + 2];
-    uint16_t addr = (addr_lower << BYTE_SIZE) | addr_upper;
+    uint16_t addr = read_addr(cpu);
 
     switch (jump_cond) {
         case NOT_ZERO:
@@ -780,4 +832,147 @@ uint16_t jump(CPU *cpu, enum JumpCondition jump_cond) {
 uint16_t jumphl(CPU *cpu) {
     uint16_t addr = get_reg(cpu, HL);
     return addr;
+}
+
+void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    uint16_t res = get_reg(cpu, (enum RegisterName)ld_source);
+    set_reg(cpu, (enum RegisterName)ld_target, res);
+}
+
+void ld_d8(CPU *cpu, enum LoadOperand ld_target) {
+    uint8_t res = cpu->memory[cpu->prog_count + 1];
+    set_reg(cpu, (enum RegisterName)ld_target, res);
+}
+
+void ld_d16(CPU *cpu, enum LoadOperand ld_target) {
+    uint16_t res = read_bbyte(cpu);
+    set_reg(cpu, (enum RegisterName)ld_target, res);
+}
+
+void ld_d8_ind(CPU *cpu) {
+    uint8_t res = read_byte(cpu);
+    uint16_t addr = get_reg(cpu, HL);
+    cpu->memory[addr] = res;
+}
+
+void ld_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    /* Load from address into register */
+    if (LO_BC_IND <= ld_source && ld_source <= LO_HL_IND) {
+        enum RegisterName addr_reg;
+        if (ld_source == LO_BC_IND) {
+            addr_reg = BC;
+        } else if (ld_source == LO_DE_IND) {
+            addr_reg = DE;
+        } else {
+            addr_reg = HL;
+        }
+        uint16_t addr = get_reg(cpu, addr_reg);
+        uint8_t res = cpu->memory[addr];
+
+        set_reg(cpu, (enum RegisterName)ld_target, res);
+    }
+
+    /* Load from register into address */
+    else if (LO_BC_IND <= ld_target && ld_target <= LO_HL_IND) {
+        enum RegisterName addr_reg;
+        if (ld_target == LO_BC_IND) {
+            addr_reg = BC;
+        } else if (ld_target == LO_DE_IND) {
+            addr_reg = DE;
+        } else {
+            addr_reg = HL;
+        }
+        uint16_t addr = get_reg(cpu, addr_reg);
+        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);  // NOLINT
+
+        cpu->memory[addr] = res;
+    }
+}
+
+void ld_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    /* Load from address into register */
+    if (ld_source == LO_A16_IND) {
+        uint16_t addr = read_addr(cpu);
+        uint8_t res = cpu->memory[addr];
+        set_reg(cpu, (enum RegisterName)ld_target, res);
+    }
+
+    /* Load from register into address */
+    else if (ld_target == LO_A16_IND) {
+        uint16_t addr = read_addr(cpu);
+        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        cpu->memory[addr] = res;
+    }
+}
+
+void ld_inc(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    /* Load from address into register */
+    if (ld_source == LO_HL_INC_IND) {
+        uint16_t addr = get_reg(cpu, HL);
+        uint8_t res = cpu->memory[addr];
+        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, HL, addr + 1);
+    }
+
+    /* Load from register into address */
+    else if (ld_target == LO_HL_INC_IND) {
+        uint16_t addr = get_reg(cpu, HL);
+        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        cpu->memory[addr] = res;
+        set_reg(cpu, HL, addr + 1);
+    }
+}
+
+void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    /* Load from address into register */
+    if (ld_source == LO_HL_INC_IND) {
+        uint16_t addr = get_reg(cpu, HL);
+        uint8_t res = cpu->memory[addr];
+        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, HL, addr - 1);
+    }
+
+    /* Load from register into address */
+    else if (ld_target == LO_HL_INC_IND) {
+        uint16_t addr = get_reg(cpu, HL);
+        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        cpu->memory[addr] = res;
+        set_reg(cpu, HL, addr - 1);
+    }
+}
+
+void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    /* Load from half address into register */
+    if (ld_source == LO_C_IND) {
+        uint8_t lower_addr = get_reg(cpu, C);
+        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint8_t res = cpu->memory[addr];
+        set_reg(cpu, (enum RegisterName)ld_target, res);
+    }
+
+    /* Load register into half address */
+    else if (ld_target == LO_C_IND) {
+        uint8_t lower_addr = get_reg(cpu, C);
+        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        cpu->memory[addr] = res;
+    }
+}
+
+void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    /* Load from half address into register */
+    if (ld_source == LO_A8_IND) {
+        uint8_t lower_addr = read_byte(cpu);
+        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint8_t res = cpu->memory[addr];
+        set_reg(cpu, (enum RegisterName)ld_target, res);
+    }
+
+    /* Load register into half address */
+    else if (ld_target == LO_A8_IND) {
+        uint8_t lower_addr = read_byte(cpu);
+        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        cpu->memory[addr] = res;
+    }
 }

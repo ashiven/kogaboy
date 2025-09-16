@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-// == Inst(kind=ADD, target=A, bit_index=7, jump_cond=NOT_ZERO)
-#define NOT_FOUND_INST {0, 0, 7, 0}
+// == Inst(kind=ADD, target=A, bit_index=7, jump_cond=NOT_ZERO, ld_target=LO_A, ld_source=LO_A)
+#define NOT_FOUND_INST {0, 0, 7, 0, 0, 0}
 
 // NOLINTBEGIN
 // Source: https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
@@ -248,19 +248,19 @@ Instruction inst_from_byte(uint8_t byte) {
 
         /* JUMP */
         case 0xC2:
-            return new_jump(NOT_ZERO);
+            return new_jp(NOT_ZERO);
         case 0xD2:
-            return new_jump(NOT_CARRY);
+            return new_jp(NOT_CARRY);
         case 0xC3:
-            return new_jump(ALWAYS);
+            return new_jp(ALWAYS);
         case 0xCA:
-            return new_jump(ZERO);
+            return new_jp(ZERO);
         case 0xDA:
-            return new_jump(CARRY);
+            return new_jp(CARRY);
 
         /* JUMPHL */
         case 0xE9:
-            return new_jumphl();
+            return new_jphl();
     }
 
     Instruction not_found = NOT_FOUND_INST;
@@ -819,156 +819,195 @@ Instruction pf_inst_from_byte(uint8_t byte) {
 // NOLINTEND
 
 Instruction new_add(enum RegisterName target) {
-    Instruction add = {ADD, target, 0, ALWAYS};
+    Instruction add = {ADD, target, 0, ALWAYS, LO_A, LO_A};
     return add;
 }
 
 Instruction new_addhl(enum RegisterName target) {
-    Instruction addhl = {ADDHL, target, 0, ALWAYS};
+    Instruction addhl = {ADDHL, target, 0, ALWAYS, LO_A, LO_A};
     return addhl;
 }
 
 Instruction new_adc(enum RegisterName target) {
-    Instruction adc = {ADC, target, 0, ALWAYS};
+    Instruction adc = {ADC, target, 0, ALWAYS, LO_A, LO_A};
     return adc;
 }
 
 Instruction new_sub(enum RegisterName target) {
-    Instruction sub = {SUB, target, 0, ALWAYS};
+    Instruction sub = {SUB, target, 0, ALWAYS, LO_A, LO_A};
     return sub;
 }
 
 Instruction new_sbc(enum RegisterName target) {
-    Instruction sbc = {SBC, target, 0, ALWAYS};
+    Instruction sbc = {SBC, target, 0, ALWAYS, LO_A, LO_A};
     return sbc;
 }
 
 Instruction new_and(enum RegisterName target) {
-    Instruction and = {AND, target, 0, ALWAYS};
+    Instruction and = {AND, target, 0, ALWAYS, LO_A, LO_A};
     return and;
 }
 
 Instruction new_or(enum RegisterName target) {
-    Instruction or_ = {OR, target, 0, ALWAYS};
+    Instruction or_ = {OR, target, 0, ALWAYS, LO_A, LO_A};
     return or_;
 }
 
 Instruction new_xor(enum RegisterName target) {
-    Instruction xor = {XOR, target, 0, ALWAYS};
+    Instruction xor = {XOR, target, 0, ALWAYS, LO_A, LO_A};
     return xor;
 }
 
 Instruction new_cp(enum RegisterName target) {
-    Instruction cp_ = {CP, target, 0, ALWAYS};
+    Instruction cp_ = {CP, target, 0, ALWAYS, LO_A, LO_A};
     return cp_;
 }
 
 Instruction new_inc(enum RegisterName target) {
-    Instruction inc = {INC, target, 0, ALWAYS};
+    Instruction inc = {INC, target, 0, ALWAYS, LO_A, LO_A};
     return inc;
 }
 
 Instruction new_dec(enum RegisterName target) {
-    Instruction dec = {DEC, target, 0, ALWAYS};
+    Instruction dec = {DEC, target, 0, ALWAYS, LO_A, LO_A};
     return dec;
 }
 
 Instruction new_ccf(void) {
-    Instruction ccf = {CCF, 0, 0, ALWAYS};
+    Instruction ccf = {CCF, 0, 0, ALWAYS, LO_A, LO_A};
     return ccf;
 }
 
 Instruction new_scf(void) {
-    Instruction scf = {SCF, 0, 0, ALWAYS};
+    Instruction scf = {SCF, 0, 0, ALWAYS, LO_A, LO_A};
     return scf;
 }
 
 Instruction new_rra(void) {
-    Instruction rra = {RRA, 0, 0, ALWAYS};
+    Instruction rra = {RRA, 0, 0, ALWAYS, LO_A, LO_A};
     return rra;
 }
 
 Instruction new_rla(void) {
-    Instruction rla = {RLA, 0, 0, ALWAYS};
+    Instruction rla = {RLA, 0, 0, ALWAYS, LO_A, LO_A};
     return rla;
 }
 
 Instruction new_rrca(void) {
-    Instruction rrca = {RRCA, 0, 0, ALWAYS};
+    Instruction rrca = {RRCA, 0, 0, ALWAYS, LO_A, LO_A};
     return rrca;
 }
 
 Instruction new_rlca(void) {
-    Instruction rrla = {RLCA, 0, 0, ALWAYS};
+    Instruction rrla = {RLCA, 0, 0, ALWAYS, LO_A, LO_A};
     return rrla;
 }
 
 Instruction new_cpl(void) {
-    Instruction cpl = {CPL, 0, 0, ALWAYS};
+    Instruction cpl = {CPL, 0, 0, ALWAYS, LO_A, LO_A};
     return cpl;
 }
 
 Instruction new_bit(uint8_t bit_index, enum RegisterName target) {
-    Instruction bit = {BIT, target, bit_index, ALWAYS};
+    Instruction bit = {BIT, target, bit_index, ALWAYS, LO_A, LO_A};
     return bit;
 }
 
 Instruction new_reset(uint8_t bit_index, enum RegisterName target) {
-    Instruction reset = {RESET, target, bit_index, ALWAYS};
+    Instruction reset = {RESET, target, bit_index, ALWAYS, LO_A, LO_A};
     return reset;
 }
 
 Instruction new_set(uint8_t bit_index, enum RegisterName target) {
-    Instruction set = {SET, target, bit_index, ALWAYS};
+    Instruction set = {SET, target, bit_index, ALWAYS, LO_A, LO_A};
     return set;
 }
 
 Instruction new_srl(enum RegisterName target) {
-    Instruction srl = {SRL, target, 0, ALWAYS};
+    Instruction srl = {SRL, target, 0, ALWAYS, LO_A, LO_A};
     return srl;
 }
 
 Instruction new_rr(enum RegisterName target) {
-    Instruction rr_ = {RR, target, 0, ALWAYS};
+    Instruction rr_ = {RR, target, 0, ALWAYS, LO_A, LO_A};
     return rr_;
 }
 
 Instruction new_rl(enum RegisterName target) {
-    Instruction rl_ = {RL, target, 0, ALWAYS};
+    Instruction rl_ = {RL, target, 0, ALWAYS, LO_A, LO_A};
     return rl_;
 }
 
 Instruction new_rrc(enum RegisterName target) {
-    Instruction rrc = {RRC, target, 0, ALWAYS};
+    Instruction rrc = {RRC, target, 0, ALWAYS, LO_A, LO_A};
     return rrc;
 }
 
 Instruction new_rlc(enum RegisterName target) {
-    Instruction rlc = {RLC, target, 0, ALWAYS};
+    Instruction rlc = {RLC, target, 0, ALWAYS, LO_A, LO_A};
     return rlc;
 }
 
 Instruction new_sra(enum RegisterName target) {
-    Instruction sra = {SRA, target, 0, ALWAYS};
+    Instruction sra = {SRA, target, 0, ALWAYS, LO_A, LO_A};
     return sra;
 }
 
 Instruction new_sla(enum RegisterName target) {
-    Instruction sla = {SLA, target, 0, ALWAYS};
+    Instruction sla = {SLA, target, 0, ALWAYS, LO_A, LO_A};
     return sla;
 }
 
 Instruction new_swap(enum RegisterName target) {
-    Instruction swap = {SWAP, target, 0, ALWAYS};
+    Instruction swap = {SWAP, target, 0, ALWAYS, LO_A, LO_A};
     return swap;
 }
 
-Instruction new_jump(enum JumpCondition jump_cond) {
-    Instruction jump = {JUMP, A, 0, jump_cond};
+Instruction new_jp(enum JumpCondition jump_cond) {
+    Instruction jump = {JP, A, 0, jump_cond, LO_A, LO_A};
     return jump;
 }
 
-Instruction new_jumphl(void) {
-    Instruction jumphl = {JUMPHL, A, 0, ALWAYS};
+Instruction new_jphl(void) {
+    Instruction jumphl = {JPHL, A, 0, ALWAYS, LO_A, LO_A};
     return jumphl;
+}
+
+Instruction new_ld(enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    enum InstructionKind load_kind;
+
+    if (ld_target == LO_HL_IND && ld_source == LO_D8) {
+        load_kind = LD_D8_IND;
+    } else if (ld_source == LO_D8) {
+        load_kind = LD_D8;
+    } else if (ld_source == LO_D16) {
+        load_kind = LD_D16;
+    } else if (ld_target == LO_A16_IND || ld_source == LO_A16_IND) {
+        load_kind = LD_ADDR;
+    } else if ((LO_BC_IND <= ld_target && ld_target <= LO_HL_IND) ||
+               (LO_BC_IND <= ld_source && ld_source <= LO_HL_IND)) {
+        load_kind = LD_IND;
+    } else if (ld_target == LO_HL_INC_IND || ld_source == LO_HL_INC_IND) {
+        load_kind = LD_INC;
+    } else if (ld_target == LO_HL_DEC_IND || ld_source == LO_HL_DEC_IND) {
+        load_kind = LD_DEC;
+    } else {
+        load_kind = LD_REG;
+    }
+
+    Instruction load = {load_kind, A, 0, ALWAYS, ld_target, ld_source};
+    return load;
+}
+
+Instruction new_ldh(enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+    enum InstructionKind loadh_kind;
+
+    if (ld_target == LO_C_IND || ld_source == LO_C_IND) {
+        loadh_kind = LDH_IND;
+    } else {
+        loadh_kind = LDH_ADDR;
+    }
+
+    Instruction loadh = {loadh_kind, A, 0, ALWAYS, ld_target, ld_source};
+    return loadh;
 }

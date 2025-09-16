@@ -18,11 +18,16 @@ void step(CPU *cpu);
 uint16_t execute(CPU *cpu, const Instruction *instruction);
 
 /* Register interactions */
-void print_reg(CPU *cpu, enum RegisterName reg);
-void print_regs(CPU *cpu);
 uint8_t get_reg(CPU *cpu, enum RegisterName reg);
 void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val);
+void print_reg(CPU *cpu, enum RegisterName reg);
+void print_regs(CPU *cpu);
 void update_flags(CPU *cpu, bool zero, bool subtract, bool half_carry, bool carry);
+
+/* Memory interactions */
+uint16_t read_addr(CPU *cpu);
+uint8_t read_byte(CPU *cpu);
+uint16_t read_bbyte(CPU *cpu);
 
 /* Instruction implementations */
 void add(CPU *cpu, enum RegisterName target);
@@ -43,6 +48,7 @@ void rla(CPU *cpu);
 void rrca(CPU *cpu);
 void rlca(CPU *cpu);
 void cpl(CPU *cpu);
+
 void bit(CPU *cpu, uint8_t bit_index, enum RegisterName target);
 void reset(CPU *cpu, uint8_t bit_index, enum RegisterName target);
 void set(CPU *cpu, uint8_t bit_index, enum RegisterName target);
@@ -54,5 +60,17 @@ void rlc(CPU *cpu, enum RegisterName target);
 void sra(CPU *cpu, enum RegisterName target);
 void sla(CPU *cpu, enum RegisterName target);
 void swap(CPU *cpu, enum RegisterName target);
+
 uint16_t jump(CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jumphl(CPU *cpu);
+
+void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ld_d8(CPU *cpu, enum LoadOperand ld_target);
+void ld_d16(CPU *cpu, enum LoadOperand ld_target);
+void ld_d8_ind(CPU *cpu);
+void ld_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ld_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ld_inc(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);

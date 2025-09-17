@@ -462,6 +462,26 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ldh(LO_A8_IND, LO_A);
         case 0xF0:
             return new_ldh(LO_A, LO_A8_IND);
+
+        /* PUSH */
+        case 0xC5:
+            return new_push(BC);
+        case 0xD5:
+            return new_push(DE);
+        case 0xE5:
+            return new_push(HL);
+        case 0xF5:
+            return new_push(AF);
+
+        /* POP */
+        case 0xC1:
+            return new_pop(BC);
+        case 0xD1:
+            return new_pop(DE);
+        case 0xE1:
+            return new_pop(HL);
+        case 0xF1:
+            return new_pop(AF);
     }
 
     Instruction not_found = NOT_FOUND_INST;
@@ -1211,4 +1231,14 @@ Instruction new_ldh(enum LoadOperand ld_target, enum LoadOperand ld_source) {  /
 
     Instruction loadh = {loadh_kind, A, 0, ALWAYS, ld_target, ld_source};
     return loadh;
+}
+
+Instruction new_push(enum RegisterName target) {
+    Instruction push = {PUSH, target, 0, ALWAYS, LO_A, LO_A};
+    return push;
+}
+
+Instruction new_pop(enum RegisterName target) {
+    Instruction pop = {POP, target, 0, ALWAYS, LO_A, LO_A};
+    return pop;
 }

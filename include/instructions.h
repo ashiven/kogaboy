@@ -2,6 +2,7 @@
 
 #include "../include/registers.h"
 
+// TODO: JR, LD_SP, EI, DI, HALT, RST...
 enum InstructionKind {  // NOLINT
     /* Arithmetic Instructions */
     ADD,   /*Add target to register A*/
@@ -51,6 +52,10 @@ enum InstructionKind {  // NOLINT
     LD_DEC,    /*Load or store the value at an address (stored in HL) and then decrement HL*/
     LDH_IND,   /*Load or store the value at an address (u8 from register C LSB + 0xFF MSB)*/
     LDH_ADDR,  /*Load or store the value at an address (u8 immediate LSB + 0xFF MSB)*/
+
+    /* Stack Instructions */
+    PUSH, /*Push a 16-bit register onto the stack*/
+    POP,  /*Pop a 16-bit value from the stack and store it in a 16-bit register*/
 };
 
 enum JumpCondition {  // NOLINT
@@ -73,6 +78,7 @@ enum LoadOperand {  // NOLINT
     LO_F,
     LO_H,
     LO_L,
+    LO_AF,
     LO_BC,
     LO_DE,
     LO_HL,
@@ -108,6 +114,7 @@ typedef struct {
     enum LoadOperand ld_source;
 } Instruction;
 
+/* Instruction Decoding */
 Instruction inst_from_byte(uint8_t byte);
 Instruction pf_inst_from_byte(uint8_t byte);
 
@@ -151,3 +158,9 @@ Instruction new_jphl(void);
 /* Load Instructions */
 Instruction new_ld(enum LoadOperand ld_target, enum LoadOperand ld_source);
 Instruction new_ldh(enum LoadOperand ld_target, enum LoadOperand ld_source);
+
+/* Stack Instructions */
+Instruction new_push(enum RegisterName target);
+Instruction new_pop(enum RegisterName target);
+
+/* Call and Return Instructions */

@@ -24,12 +24,16 @@ const char *reg_name(enum RegisterName reg) {
             return "H";
         case L:
             return "L";
+        case AF:
+            return "AF";
         case BC:
             return "BC";
         case DE:
             return "DE";
         case HL:
             return "HL";
+        case SP:
+            return "SP";
     }
 
     return "Unknown";
@@ -38,6 +42,15 @@ const char *reg_name(enum RegisterName reg) {
 Registers new_regs(void) {
     Registers regs = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
     return regs;
+}
+
+uint16_t get_af(const Registers *regs) {
+    return (uint16_t)(regs->a) << BYTE_SIZE | (uint16_t)regs->f;
+}
+
+void set_af(Registers *regs, uint16_t val) {
+    regs->a = (uint8_t)((val & UPPER_M) >> BYTE_SIZE);
+    regs->f = (uint8_t)(val & LOWER_M);
 }
 
 uint16_t get_bc(const Registers *regs) {

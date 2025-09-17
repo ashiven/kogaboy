@@ -8,6 +8,7 @@ typedef struct {
     Registers registers;
     FlagRegister flag_reg;
     uint16_t prog_count;
+    uint16_t stack_pointer;
     uint8_t memory[MEMORY_SIZE];
 } CPU;
 
@@ -61,8 +62,8 @@ void sra(CPU *cpu, enum RegisterName target);
 void sla(CPU *cpu, enum RegisterName target);
 void swap(CPU *cpu, enum RegisterName target);
 
-uint16_t jump(CPU *cpu, enum JumpCondition jump_cond);
-uint16_t jumphl(CPU *cpu);
+uint16_t jp(CPU *cpu, enum JumpCondition jump_cond);
+uint16_t jphl(CPU *cpu);
 
 void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
 void ld_d8(CPU *cpu, enum LoadOperand ld_target);
@@ -74,3 +75,6 @@ void ld_inc(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
 void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
 void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
 void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+
+void push(CPU *cpu, enum RegisterName target);
+void pop(CPU *cpu, enum RegisterName target);

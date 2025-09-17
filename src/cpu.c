@@ -6,6 +6,8 @@
 #define HBYTE_M 0xF
 #define BYTE_M 0xFF
 #define BBYTE_M 0xFFFF
+#define UPPER_BYTE_M 0xFF00
+
 #define MSB_IDX 7
 #define PREFIX_BYTE 0xCB
 #define BYTE_SIZE 8
@@ -21,7 +23,7 @@
 CPU new_cpu(void) {
     Registers regs = new_regs();
     FlagRegister flag_reg = new_flag_reg();
-    CPU cpu = {regs, flag_reg, 0, {0}};
+    CPU cpu = {regs, flag_reg, 0, 0, {0}};
     return cpu;
 }
 
@@ -136,9 +138,9 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
 
         /* Jump Instructions */
         case JP:
-            return jump(cpu, instruction->jump_cond);
+            return jp(cpu, instruction->jump_cond);
         case JPHL:
-            return jumphl(cpu);
+            return jphl(cpu);
 
         /* Load Instructions */
         case LD_REG:
@@ -171,6 +173,14 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
         case LDH_ADDR:
             ldh_addr(cpu, instruction->ld_target, instruction->ld_source);
             return cpu->prog_count + 2;
+
+        /* Stack Instructions */
+        case PUSH:
+            push(cpu, instruction->target);
+            return cpu->prog_count + 1;
+        case POP:
+            pop(cpu, instruction->target);
+            return cpu->prog_count + 1;
     }
 
     return 0;
@@ -194,12 +204,16 @@ uint8_t get_reg(CPU *cpu, enum RegisterName reg) {
             return cpu->registers.h;
         case L:
             return cpu->registers.l;
+        case AF:
+            return get_af(&cpu->registers);
         case BC:
             return get_bc(&cpu->registers);
         case DE:
             return get_de(&cpu->registers);
         case HL:
             return get_hl(&cpu->registers);
+        case SP:
+            return cpu->stack_pointer;
     }
     return 0;
 }
@@ -230,6 +244,9 @@ void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val) {  // NOLINT
         case L:
             cpu->registers.l = val;
             break;
+        case AF:
+            set_af(&cpu->registers, val);
+            break;
         case BC:
             set_bc(&cpu->registers, val);
             break;
@@ -239,6 +256,8 @@ void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val) {  // NOLINT
         case HL:
             set_hl(&cpu->registers, val);
             break;
+        case SP:
+            cpu->stack_pointer = val;
     }
 }
 
@@ -422,10 +441,9 @@ void inc(CPU *cpu, enum RegisterName target) {
 
     // Flags are only affected when incrementing
     // a byte register as opposed to a 2-byte register.
-    // TODO: adjust after adding AF to enum
-    // and look into zero if the values inside of the
+    // TODO: Look into zero if the values inside of the
     // registers are actually representations of signed integers
-    if (target < BC) {
+    if (target < AF) {
         bool zero = false;
         bool subtract = false;
         bool half_carry = (val & HBYTE_M) + 1 > HBYTE_M;
@@ -441,7 +459,7 @@ void dec(CPU *cpu, enum RegisterName target) {
     uint8_t res = val - 1;
 
     // TODO: same as above
-    if (target < BC) {
+    if (target < AF) {
         bool zero = res == 0;
         bool subtract = true;
         bool half_carry = (val & HBYTE_M) >= 1;
@@ -798,7 +816,7 @@ void swap(CPU *cpu, enum RegisterName target) {
  * the program counter by the size of the instruction.
  * (1 byte for the instr + 2 bytes for the address)
  */
-uint16_t jump(CPU *cpu, enum JumpCondition jump_cond) {
+uint16_t jp(CPU *cpu, enum JumpCondition jump_cond) {
     uint16_t addr = read_addr(cpu);
 
     switch (jump_cond) {
@@ -829,7 +847,7 @@ uint16_t jump(CPU *cpu, enum JumpCondition jump_cond) {
     return cpu->prog_count + 3;
 }
 
-uint16_t jumphl(CPU *cpu) {
+uint16_t jphl(CPU *cpu) {
     uint16_t addr = get_reg(cpu, HL);
     return addr;
 }
@@ -945,7 +963,7 @@ void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {
     /* Load from half address into register */
     if (ld_source == LO_C_IND) {
         uint8_t lower_addr = get_reg(cpu, C);
-        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint16_t addr = UPPER_BYTE_M | lower_addr;
         uint8_t res = cpu->memory[addr];
         set_reg(cpu, (enum RegisterName)ld_target, res);
     }
@@ -953,7 +971,7 @@ void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {
     /* Load register into half address */
     else if (ld_target == LO_C_IND) {
         uint8_t lower_addr = get_reg(cpu, C);
-        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint16_t addr = UPPER_BYTE_M | lower_addr;
         uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
         cpu->memory[addr] = res;
     }
@@ -963,7 +981,7 @@ void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) 
     /* Load from half address into register */
     if (ld_source == LO_A8_IND) {
         uint8_t lower_addr = read_byte(cpu);
-        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint16_t addr = UPPER_BYTE_M | lower_addr;
         uint8_t res = cpu->memory[addr];
         set_reg(cpu, (enum RegisterName)ld_target, res);
     }
@@ -971,8 +989,38 @@ void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) 
     /* Load register into half address */
     else if (ld_target == LO_A8_IND) {
         uint8_t lower_addr = read_byte(cpu);
-        uint16_t addr = (BYTE_M << BYTE_SIZE) | lower_addr;
+        uint16_t addr = UPPER_BYTE_M | lower_addr;
         uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
         cpu->memory[addr] = res;
     }
+}
+
+void push(CPU *cpu, enum RegisterName target) {
+    uint16_t val = get_reg(cpu, target);
+    uint8_t val_upper = (UPPER_BYTE_M & val) >> BYTE_SIZE;
+    uint8_t val_lower = BYTE_M & val;
+
+    cpu->stack_pointer -= 1;
+    cpu->memory[cpu->stack_pointer] = val_upper;
+
+    cpu->stack_pointer -= 1;
+    cpu->memory[cpu->stack_pointer] = val_lower;
+}
+
+void pop(CPU *cpu, enum RegisterName target) {
+    uint8_t val_lower = cpu->memory[cpu->stack_pointer];
+    cpu->stack_pointer += 1;
+
+    uint8_t val_upper = cpu->memory[cpu->stack_pointer];
+    cpu->stack_pointer += 1;
+
+    uint16_t val = (val_upper << BYTE_SIZE) | val_lower;
+
+    /* Update flag register with F when popping AF */
+    if (target == AF) {
+        cpu->flag_reg = byte_to_flag_reg(val_lower);
+        set_reg(cpu, F, val_lower);
+    }
+
+    set_reg(cpu, target, val);
 }

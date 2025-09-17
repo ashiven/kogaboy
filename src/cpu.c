@@ -181,6 +181,12 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
         case POP:
             pop(cpu, instruction->target);
             return cpu->prog_count + 1;
+
+        /* Call and Return Instructions */
+        case CALL:
+            return call(cpu, instruction->jump_cond);
+        case RET:
+            return ret(cpu, instruction->jump_cond);
     }
 
     return 0;
@@ -303,6 +309,28 @@ uint16_t read_bbyte(CPU *cpu) {
     uint16_t bbyte = ((uint16_t)bbyte_upper << BYTE_SIZE) | (uint16_t)bbyte_lower;
 
     return bbyte;
+}
+
+void stack_push(CPU *cpu, uint16_t val) {
+    uint8_t val_upper = (UPPER_BYTE_M & val) >> BYTE_SIZE;
+    uint8_t val_lower = BYTE_M & val;
+
+    cpu->stack_pointer -= 1;
+    cpu->memory[cpu->stack_pointer] = val_upper;
+
+    cpu->stack_pointer -= 1;
+    cpu->memory[cpu->stack_pointer] = val_lower;
+}
+
+uint16_t stack_pop(CPU *cpu) {
+    uint8_t val_lower = cpu->memory[cpu->stack_pointer];
+    cpu->stack_pointer += 1;
+
+    uint8_t val_upper = cpu->memory[cpu->stack_pointer];
+    cpu->stack_pointer += 1;
+
+    uint16_t val = (val_upper << BYTE_SIZE) | val_lower;
+    return val;
 }
 
 void add(CPU *cpu, enum RegisterName target) {
@@ -809,6 +837,35 @@ void swap(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, target, res);  // NOLINT
 }
 
+bool jump_test(const CPU *cpu, enum JumpCondition jump_cond) {
+    bool jump = false;
+    switch (jump_cond) {
+        case NOT_ZERO:
+            if (!cpu->flag_reg.zero) {
+                jump = true;
+            }
+            break;
+        case ZERO:
+            if (cpu->flag_reg.zero) {
+                jump = true;
+            }
+            break;
+        case NOT_CARRY:
+            if (!cpu->flag_reg.carry) {
+                jump = true;
+            }
+            break;
+        case CARRY:
+            if (cpu->flag_reg.carry) {
+                jump = true;
+            }
+            break;
+        case ALWAYS:
+            jump = true;
+    }
+    return jump;
+}
+
 /* Based on the given jump condition, we jump to
  * the address specified in the following two bytes in memory.
  *
@@ -818,33 +875,14 @@ void swap(CPU *cpu, enum RegisterName target) {
  */
 uint16_t jp(CPU *cpu, enum JumpCondition jump_cond) {
     uint16_t addr = read_addr(cpu);
+    uint16_t next_pc = cpu->prog_count + 3;
 
-    switch (jump_cond) {
-        case NOT_ZERO:
-            if (!cpu->flag_reg.zero) {
-                return addr;
-            }
-            break;
-        case ZERO:
-            if (cpu->flag_reg.zero) {
-                return addr;
-            }
-            break;
-        case NOT_CARRY:
-            if (!cpu->flag_reg.carry) {
-                return addr;
-            }
-            break;
-        case CARRY:
-            if (cpu->flag_reg.carry) {
-                return addr;
-            }
-            break;
-        case ALWAYS:
-            return addr;
+    bool jump = jump_test(cpu, jump_cond);
+    if (jump) {
+        return addr;
     }
 
-    return cpu->prog_count + 3;
+    return next_pc;
 }
 
 uint16_t jphl(CPU *cpu) {
@@ -997,30 +1035,42 @@ void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) 
 
 void push(CPU *cpu, enum RegisterName target) {
     uint16_t val = get_reg(cpu, target);
-    uint8_t val_upper = (UPPER_BYTE_M & val) >> BYTE_SIZE;
-    uint8_t val_lower = BYTE_M & val;
-
-    cpu->stack_pointer -= 1;
-    cpu->memory[cpu->stack_pointer] = val_upper;
-
-    cpu->stack_pointer -= 1;
-    cpu->memory[cpu->stack_pointer] = val_lower;
+    stack_push(cpu, val);
 }
 
 void pop(CPU *cpu, enum RegisterName target) {
-    uint8_t val_lower = cpu->memory[cpu->stack_pointer];
-    cpu->stack_pointer += 1;
-
-    uint8_t val_upper = cpu->memory[cpu->stack_pointer];
-    cpu->stack_pointer += 1;
-
-    uint16_t val = (val_upper << BYTE_SIZE) | val_lower;
+    uint16_t val = stack_pop(cpu);
 
     /* Update flag register with F when popping AF */
     if (target == AF) {
+        uint8_t val_lower = BYTE_M & val;
         cpu->flag_reg = byte_to_flag_reg(val_lower);
         set_reg(cpu, F, val_lower);
     }
 
     set_reg(cpu, target, val);
+}
+
+uint16_t call(CPU *cpu, enum JumpCondition jump_cond) {
+    uint16_t next_pc = cpu->prog_count + 3;
+
+    bool jump = jump_test(cpu, jump_cond);
+    if (jump) {
+        stack_push(cpu, next_pc);
+        uint16_t addr = read_addr(cpu);
+        return addr;
+    }
+
+    return next_pc;
+}
+
+uint16_t ret(CPU *cpu, enum JumpCondition jump_cond) {
+    uint16_t next_pc = cpu->prog_count + 1;
+
+    bool jump = jump_test(cpu, jump_cond);
+    if (jump) {
+        return stack_pop(cpu);
+    }
+
+    return next_pc;
 }

@@ -482,6 +482,30 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_pop(HL);
         case 0xF1:
             return new_pop(AF);
+
+        /* CALL */
+        case 0xC4:
+            return new_call(NOT_ZERO);
+        case 0xD4:
+            return new_call(NOT_CARRY);
+        case 0xCC:
+            return new_call(ZERO);
+        case 0xDC:
+            return new_call(CARRY);
+        case 0xCD:
+            return new_call(ALWAYS);
+
+        /* RET */
+        case 0xC0:
+            return new_ret(NOT_ZERO);
+        case 0xD0:
+            return new_ret(NOT_CARRY);
+        case 0xC8:
+            return new_ret(ZERO);
+        case 0xD8:
+            return new_ret(CARRY);
+        case 0xC9:
+            return new_ret(ALWAYS);
     }
 
     Instruction not_found = NOT_FOUND_INST;
@@ -1241,4 +1265,14 @@ Instruction new_push(enum RegisterName target) {
 Instruction new_pop(enum RegisterName target) {
     Instruction pop = {POP, target, 0, ALWAYS, LO_A, LO_A};
     return pop;
+}
+
+Instruction new_call(enum JumpCondition jump_cond) {
+    Instruction call = {CALL, A, 0, jump_cond, LO_A, LO_A};
+    return call;
+}
+
+Instruction new_ret(enum JumpCondition jump_cond) {
+    Instruction ret = {RET, A, 0, jump_cond, LO_A, LO_A};
+    return ret;
 }

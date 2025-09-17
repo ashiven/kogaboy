@@ -6,8 +6,10 @@
 #define HALF_CARRY_BIT_POS 5
 #define CARRY_BIT_POS 4
 
-// TODO: AF, SP, and PC
+// TODO: PC
 enum RegisterName { A, B, C, D, E, F, H, L, AF, BC, DE, HL, SP };  // NOLINT
+
+const char *reg_name(enum RegisterName reg);
 
 typedef struct {
     uint8_t a;
@@ -19,8 +21,6 @@ typedef struct {
     uint8_t h;
     uint8_t l;
 } Registers;
-
-const char *reg_name(enum RegisterName reg);
 
 Registers new_regs(void);
 

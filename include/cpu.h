@@ -30,6 +30,10 @@ uint16_t read_addr(CPU *cpu);
 uint8_t read_byte(CPU *cpu);
 uint16_t read_bbyte(CPU *cpu);
 
+/* Stack interactions */
+void stack_push(CPU *cpu, uint16_t val);
+uint16_t stack_pop(CPU *cpu);
+
 /* Instruction implementations */
 void add(CPU *cpu, enum RegisterName target);
 void addhl(CPU *cpu, enum RegisterName target);
@@ -62,6 +66,7 @@ void sra(CPU *cpu, enum RegisterName target);
 void sla(CPU *cpu, enum RegisterName target);
 void swap(CPU *cpu, enum RegisterName target);
 
+bool jump_test(const CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jp(CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jphl(CPU *cpu);
 
@@ -78,3 +83,6 @@ void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
 
 void push(CPU *cpu, enum RegisterName target);
 void pop(CPU *cpu, enum RegisterName target);
+
+uint16_t call(CPU *cpu, enum JumpCondition jump_cond);
+uint16_t ret(CPU *cpu, enum JumpCondition jump_cond);

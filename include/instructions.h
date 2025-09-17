@@ -56,6 +56,12 @@ enum InstructionKind {  // NOLINT
     /* Stack Instructions */
     PUSH, /*Push a 16-bit register onto the stack*/
     POP,  /*Pop a 16-bit value from the stack and store it in a 16-bit register*/
+
+    /* Call and Return Instructions */
+    CALL, /*Conditionally jump to an address marking the start of a function, storing the current PC
+             on the stack*/
+    RET,  /*Conditionally return from a function call by popping the previously stored PC from the
+             stack and jumping to it*/
 };
 
 enum JumpCondition {  // NOLINT
@@ -154,6 +160,7 @@ Instruction new_swap(enum RegisterName target);
 /* Jump Instructions */
 Instruction new_jp(enum JumpCondition jump_cond);
 Instruction new_jphl(void);
+// Instruction new_jr(enum JumpCondition jump_cond);
 
 /* Load Instructions */
 Instruction new_ld(enum LoadOperand ld_target, enum LoadOperand ld_source);
@@ -164,3 +171,6 @@ Instruction new_push(enum RegisterName target);
 Instruction new_pop(enum RegisterName target);
 
 /* Call and Return Instructions */
+Instruction new_call(enum JumpCondition jump_cond);
+Instruction new_ret(enum JumpCondition jump_cond);
+// Instruction new_reti(enum JumpCondition jump_cond);

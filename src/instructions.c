@@ -246,7 +246,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x2F:
             return new_cpl();
 
-        /* JUMP */
+        /* JP */
         case 0xC2:
             return new_jp(NOT_ZERO);
         case 0xD2:
@@ -258,9 +258,210 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0xDA:
             return new_jp(CARRY);
 
-        /* JUMPHL */
+        /* JPHL */
         case 0xE9:
             return new_jphl();
+
+        /* LD_REG */
+        case 0x40:
+            return new_ld(LO_B, LO_B);
+        case 0x41:
+            return new_ld(LO_B, LO_C);
+        case 0x42:
+            return new_ld(LO_B, LO_D);
+        case 0x43:
+            return new_ld(LO_B, LO_E);
+        case 0x44:
+            return new_ld(LO_B, LO_H);
+        case 0x45:
+            return new_ld(LO_B, LO_L);
+        case 0x47:
+            return new_ld(LO_B, LO_A);
+        case 0x48:
+            return new_ld(LO_C, LO_B);
+        case 0x49:
+            return new_ld(LO_C, LO_C);
+        case 0x4A:
+            return new_ld(LO_C, LO_D);
+        case 0x4B:
+            return new_ld(LO_C, LO_E);
+        case 0x4C:
+            return new_ld(LO_C, LO_H);
+        case 0x4D:
+            return new_ld(LO_C, LO_L);
+        case 0x4F:
+            return new_ld(LO_C, LO_A);
+
+        case 0x50:
+            return new_ld(LO_D, LO_B);
+        case 0x51:
+            return new_ld(LO_D, LO_C);
+        case 0x52:
+            return new_ld(LO_D, LO_D);
+        case 0x53:
+            return new_ld(LO_D, LO_E);
+        case 0x54:
+            return new_ld(LO_D, LO_H);
+        case 0x55:
+            return new_ld(LO_D, LO_L);
+        case 0x57:
+            return new_ld(LO_D, LO_A);
+        case 0x58:
+            return new_ld(LO_E, LO_B);
+        case 0x59:
+            return new_ld(LO_E, LO_C);
+        case 0x5A:
+            return new_ld(LO_E, LO_D);
+        case 0x5B:
+            return new_ld(LO_E, LO_E);
+        case 0x5C:
+            return new_ld(LO_E, LO_H);
+        case 0x5D:
+            return new_ld(LO_E, LO_L);
+        case 0x5F:
+            return new_ld(LO_E, LO_A);
+
+        case 0x60:
+            return new_ld(LO_H, LO_B);
+        case 0x61:
+            return new_ld(LO_H, LO_C);
+        case 0x62:
+            return new_ld(LO_H, LO_D);
+        case 0x63:
+            return new_ld(LO_H, LO_E);
+        case 0x64:
+            return new_ld(LO_H, LO_H);
+        case 0x65:
+            return new_ld(LO_H, LO_L);
+        case 0x67:
+            return new_ld(LO_H, LO_A);
+        case 0x68:
+            return new_ld(LO_L, LO_B);
+        case 0x69:
+            return new_ld(LO_L, LO_C);
+        case 0x6A:
+            return new_ld(LO_L, LO_D);
+        case 0x6B:
+            return new_ld(LO_L, LO_E);
+        case 0x6C:
+            return new_ld(LO_L, LO_H);
+        case 0x6D:
+            return new_ld(LO_L, LO_L);
+        case 0x6F:
+            return new_ld(LO_L, LO_A);
+
+        case 0x78:
+            return new_ld(LO_A, LO_B);
+        case 0x79:
+            return new_ld(LO_A, LO_C);
+        case 0x7A:
+            return new_ld(LO_A, LO_D);
+        case 0x7B:
+            return new_ld(LO_A, LO_E);
+        case 0x7C:
+            return new_ld(LO_A, LO_H);
+        case 0x7D:
+            return new_ld(LO_A, LO_L);
+        case 0x7F:
+            return new_ld(LO_A, LO_A);
+
+        /* LD_D8 */
+        case 0x06:
+            return new_ld(LO_B, LO_D8);
+        case 0x16:
+            return new_ld(LO_D, LO_D8);
+        case 0x26:
+            return new_ld(LO_H, LO_D8);
+        case 0x0E:
+            return new_ld(LO_C, LO_D8);
+        case 0x1E:
+            return new_ld(LO_E, LO_D8);
+        case 0x2E:
+            return new_ld(LO_L, LO_D8);
+        case 0x3E:
+            return new_ld(LO_A, LO_D8);
+
+        /* LD_D16 */
+        case 0x01:
+            return new_ld(LO_BC, LO_D8);
+        case 0x11:
+            return new_ld(LO_DE, LO_D8);
+        case 0x21:
+            return new_ld(LO_HL, LO_D8);
+        case 0x31:
+            return new_ld(LO_SP, LO_D8);
+
+        /* LD_D8_IND */
+        case 0x36:
+            return new_ld(LO_HL_IND, LO_D8);
+
+        /* LD_IND */
+        case 0x02:
+            return new_ld(LO_BC_IND, LO_A);
+        case 0x12:
+            return new_ld(LO_DE_IND, LO_A);
+        case 0x0A:
+            return new_ld(LO_A, LO_BC_IND);
+        case 0x1A:
+            return new_ld(LO_A, LO_DE_IND);
+        case 0x46:
+            return new_ld(LO_B, LO_HL_IND);
+        case 0x56:
+            return new_ld(LO_D, LO_HL_IND);
+        case 0x66:
+            return new_ld(LO_H, LO_HL_IND);
+        case 0x4E:
+            return new_ld(LO_C, LO_HL_IND);
+        case 0x5E:
+            return new_ld(LO_E, LO_HL_IND);
+        case 0x6E:
+            return new_ld(LO_L, LO_HL_IND);
+        case 0x7E:
+            return new_ld(LO_A, LO_HL_IND);
+        case 0x70:
+            return new_ld(LO_HL_IND, LO_B);
+        case 0x71:
+            return new_ld(LO_HL_IND, LO_C);
+        case 0x72:
+            return new_ld(LO_HL_IND, LO_D);
+        case 0x73:
+            return new_ld(LO_HL_IND, LO_E);
+        case 0x74:
+            return new_ld(LO_HL_IND, LO_H);
+        case 0x75:
+            return new_ld(LO_HL_IND, LO_L);
+        case 0x77:
+            return new_ld(LO_HL_IND, LO_A);
+
+        /* LD_ADDR */
+        case 0xEA:
+            return new_ld(LO_A16_IND, LO_A);
+        case 0xFA:
+            return new_ld(LO_A, LO_A16_IND);
+
+        /* LD_INC */
+        case 0x22:
+            return new_ld(LO_HL_INC_IND, LO_A);
+        case 0x2A:
+            return new_ld(LO_A, LO_HL_INC_IND);
+
+        /* LD_DEC */
+        case 0x32:
+            return new_ld(LO_HL_DEC_IND, LO_A);
+        case 0x3A:
+            return new_ld(LO_A, LO_HL_DEC_IND);
+
+        /* LDH_IND */
+        case 0xE2:
+            return new_ldh(LO_C_IND, LO_A);
+        case 0xF2:
+            return new_ldh(LO_A, LO_C_IND);
+
+        /* LDH_ADDR */
+        case 0xE0:
+            return new_ldh(LO_A8_IND, LO_A);
+        case 0xF0:
+            return new_ldh(LO_A, LO_A8_IND);
     }
 
     Instruction not_found = NOT_FOUND_INST;

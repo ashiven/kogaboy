@@ -62,6 +62,9 @@ enum InstructionKind {  // NOLINT
              on the stack*/
     RET,  /*Conditionally return from a function call by popping the previously stored PC from the
              stack and jumping to it*/
+
+    /* No Op Instruction */
+    NOP /*Do nothing*/
 };
 
 enum JumpCondition {  // NOLINT
@@ -174,3 +177,6 @@ Instruction new_pop(enum RegisterName target);
 Instruction new_call(enum JumpCondition jump_cond);
 Instruction new_ret(enum JumpCondition jump_cond);
 // Instruction new_reti(enum JumpCondition jump_cond);
+
+/* No Op Instruction */
+Instruction new_nop(void);

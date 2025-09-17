@@ -187,6 +187,10 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
             return call(cpu, instruction->jump_cond);
         case RET:
             return ret(cpu, instruction->jump_cond);
+
+        /* No Op Instruction */
+        case NOP:
+            return cpu->prog_count + 1;
     }
 
     return 0;

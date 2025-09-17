@@ -1276,3 +1276,8 @@ Instruction new_ret(enum JumpCondition jump_cond) {
     Instruction ret = {RET, A, 0, jump_cond, LO_A, LO_A};
     return ret;
 }
+
+Instruction new_nop(void) {
+    Instruction nop = {NOP, A, 0, ALWAYS, LO_A, LO_A};
+    return nop;
+}

@@ -25,8 +25,9 @@ DOC_DIR   := docs
 BINARY_NAME   := kogaboy
 BINARY        := $(BIN_DIR)/$(BINARY_NAME)
 TEST_BINARY   := $(BIN_DIR)/test_$(BINARY_NAME)
-SRC_FILES     := $(wildcard $(SRC_DIR)/*.c)
+SRC_FILES     := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_FILES     := $(patsubst $(SRC_DIR)/%.c, $(TARGET_DIR)/%.o, $(SRC_FILES))
+OBJ_DIRS      := $(sort $(dir $(OBJ_FILES)))
 DEP_FILES     := $(OBJ_FILES:.o=.d)
 TEST_FILES    := $(wildcard $(TEST_DIR)/*.c)
 STATIC_LIB    := $(LIB_DIR)/libproject.a
@@ -37,7 +38,7 @@ PATH := $(if $(findstring /snap/bin,$(PATH)),$(PATH),/snap/bin:$(PATH))
 SHELL := /bin/bash
 .SHELLFLAGS := -e -o pipefail -c
 
-$(BIN_DIR) $(TARGET_DIR) $(LIB_DIR):
+$(BIN_DIR) $(TARGET_DIR) $(LIB_DIR) $(OBJ_DIRS):
 	mkdir -p $@
 
 .DEFAULT_GOAL := help
@@ -58,7 +59,7 @@ $(BINARY): $(OBJ_FILES) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 # Build object files with dependency generation
-$(TARGET_DIR)/%.o: $(SRC_DIR)/%.c | $(TARGET_DIR)
+$(TARGET_DIR)/%.o: $(SRC_DIR)/%.c | $(TARGET_DIR) $(OBJ_DIRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: rebuild

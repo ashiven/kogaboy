@@ -1,4 +1,4 @@
-#include "../include/registers.h"
+#include "../../include/registers.h"
 
 #include <stdint.h>
 
@@ -124,3 +124,5 @@ uint8_t get_half_carry(FlagRegister *flag_reg) { return flag_reg->half_carry ? 1
  * and 0000_0000 otherwise.
  */
 uint8_t get_carry(FlagRegister *flag_reg) { return flag_reg->carry ? 1 : 0; }
+
+

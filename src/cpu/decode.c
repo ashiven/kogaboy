@@ -1,9 +1,4 @@
-#include "../include/instructions.h"
-
-#include <stdint.h>
-
-// == Inst(kind=ADD, target=A, bit_index=7, jump_cond=NOT_ZERO, ld_target=LO_A, ld_source=LO_A)
-#define NOT_FOUND_INST {0, 0, 7, 0, 0, 0}
+#include "../../include/instructions.h"
 
 // NOLINTBEGIN
 // Source: https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html

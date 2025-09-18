@@ -4,6 +4,23 @@
 
 #define MEMORY_SIZE 0xFFFF
 
+#define HBYTE_M 0xF
+#define BYTE_M 0xFF
+#define BBYTE_M 0xFFFF
+#define UPPER_BYTE_M 0xFF00
+
+#define MSB_IDX 7
+#define PREFIX_BYTE 0xCB
+#define BYTE_SIZE 8
+
+// Source:
+// https://stackoverflow.com/questions/111928/is-there-a-printf-converter-to-print-in-binary-format
+#define PRIbin "%c%c%c%c_%c%c%c%c"
+#define BYTE_TO_BIN(byte)                                                                      \
+    ((byte) & 0x80 ? '1' : '0'), ((byte) & 0x40 ? '1' : '0'), ((byte) & 0x20 ? '1' : '0'),     \
+        ((byte) & 0x10 ? '1' : '0'), ((byte) & 0x08 ? '1' : '0'), ((byte) & 0x04 ? '1' : '0'), \
+        ((byte) & 0x02 ? '1' : '0'), ((byte) & 0x01 ? '1' : '0')
+
 typedef struct {
     Registers registers;
     FlagRegister flag_reg;

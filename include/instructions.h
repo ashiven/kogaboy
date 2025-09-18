@@ -2,6 +2,9 @@
 
 #include "../include/registers.h"
 
+// == Inst(kind=ADD, target=A, bit_index=7, jump_cond=NOT_ZERO, ld_target=LO_A, ld_source=LO_A)
+#define NOT_FOUND_INST {0, 0, 7, 0, 0, 0}
+
 // TODO: JR, LD_SP, EI, DI, HALT, RST...
 enum InstructionKind {  // NOLINT
     /* Arithmetic Instructions */

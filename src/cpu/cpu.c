@@ -179,7 +179,7 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
     return 0;
 }
 
-uint8_t get_reg(CPU *cpu, enum RegisterName reg) {
+uint16_t get_reg(CPU *cpu, enum RegisterName reg) {
     switch (reg) {
         case A:
             return cpu->registers.a;
@@ -211,7 +211,7 @@ uint8_t get_reg(CPU *cpu, enum RegisterName reg) {
     return 0;
 }
 
-void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val) {  // NOLINT
+void set_reg(CPU *cpu, enum RegisterName reg, uint16_t val) {  // NOLINT
     switch (reg) {
         case A:
             cpu->registers.a = val;
@@ -254,9 +254,15 @@ void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val) {  // NOLINT
     }
 }
 
-void print_reg(CPU *cpu, enum RegisterName reg) {
-    uint8_t val = get_reg(cpu, reg);
-    printf("%s: " PRIbin "\n", reg_name(reg), BYTE_TO_BIN(val));
+void print_reg(CPU *cpu, enum RegisterName reg) {  // NOLINT
+    if (reg <= L) {
+        uint8_t val = get_reg(cpu, reg);
+        printf("%s: " PRIbin "\n", reg_name(reg), BYTE_TO_BIN(val));
+    } else {
+        uint16_t val = get_reg(cpu, reg);
+        printf("%s: " PRIbin "_" PRIbin "\n", reg_name(reg),
+               BYTE_TO_BIN((uint8_t)(val >> BYTE_SIZE)), BYTE_TO_BIN((uint8_t)val));
+    }
 }
 
 void print_regs(CPU *cpu) {
@@ -276,14 +282,6 @@ void update_flags(CPU *cpu, bool zero, bool subtract, bool half_carry, bool carr
     cpu->registers.f = flag_reg_to_byte(&cpu->flag_reg);
 }
 
-uint16_t read_addr(CPU *cpu) {
-    uint8_t addr_lower = cpu->memory[cpu->prog_count + 1];
-    uint8_t addr_upper = cpu->memory[cpu->prog_count + 2];
-    uint16_t addr = ((uint16_t)addr_upper << BYTE_SIZE) | (uint16_t)addr_lower;
-
-    return addr;
-}
-
 uint8_t read_byte(CPU *cpu) {
     uint8_t byte = cpu->memory[cpu->prog_count + 1];
 
@@ -293,7 +291,7 @@ uint8_t read_byte(CPU *cpu) {
 uint16_t read_bbyte(CPU *cpu) {
     uint8_t bbyte_lower = cpu->memory[cpu->prog_count + 1];
     uint8_t bbyte_upper = cpu->memory[cpu->prog_count + 2];
-    uint16_t bbyte = ((uint16_t)bbyte_upper << BYTE_SIZE) | (uint16_t)bbyte_lower;
+    uint16_t bbyte = (uint16_t)bbyte_upper << BYTE_SIZE | (uint16_t)bbyte_lower;
 
     return bbyte;
 }

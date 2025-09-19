@@ -96,10 +96,10 @@ uint8_t flag_reg_to_byte(FlagRegister *flag_reg) {
 
 FlagRegister byte_to_flag_reg(uint8_t byte) {
     FlagRegister flag_reg = {
-        (((byte >> ZERO_BIT_POS) & 1) == 1) ? true : false,
-        (((byte >> SUBTRACT_BIT_POS) & 1) == 1) ? true : false,
-        (((byte >> HALF_CARRY_BIT_POS) & 1) == 1) ? true : false,
-        (((byte >> CARRY_BIT_POS) & 1) == 1) ? true : false,
+        (((byte >> ZERO_BIT_POS) & 1) == 1),
+        (((byte >> SUBTRACT_BIT_POS) & 1) == 1),
+        (((byte >> HALF_CARRY_BIT_POS) & 1) == 1),
+        (((byte >> CARRY_BIT_POS) & 1) == 1),
     };
 
     return flag_reg;
@@ -124,5 +124,3 @@ uint8_t get_half_carry(FlagRegister *flag_reg) { return flag_reg->half_carry ? 1
  * and 0000_0000 otherwise.
  */
 uint8_t get_carry(FlagRegister *flag_reg) { return flag_reg->carry ? 1 : 0; }
-
-

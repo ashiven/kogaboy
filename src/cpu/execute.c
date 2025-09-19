@@ -541,7 +541,7 @@ bool jump_test(const CPU *cpu, enum JumpCondition jump_cond) {
  * (1 byte for the instr + 2 bytes for the address)
  */
 uint16_t jp(CPU *cpu, enum JumpCondition jump_cond) {
-    uint16_t addr = read_addr(cpu);
+    uint16_t addr = read_bbyte(cpu);
     uint16_t next_pc = cpu->prog_count + 3;
 
     bool jump = jump_test(cpu, jump_cond);
@@ -615,14 +615,14 @@ void ld_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) { 
 void ld_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
     /* Load from address into register */
     if (ld_source == LO_A16_IND) {
-        uint16_t addr = read_addr(cpu);
+        uint16_t addr = read_bbyte(cpu);
         uint8_t res = cpu->memory[addr];
         set_reg(cpu, (enum RegisterName)ld_target, res);
     }
 
     /* Load from register into address */
     else if (ld_target == LO_A16_IND) {
-        uint16_t addr = read_addr(cpu);
+        uint16_t addr = read_bbyte(cpu);
         uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
         cpu->memory[addr] = res;
     }
@@ -648,7 +648,7 @@ void ld_inc(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) { 
 
 void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
     /* Load from address into register */
-    if (ld_source == LO_HL_INC_IND) {
+    if (ld_source == LO_HL_DEC_IND) {
         uint16_t addr = get_reg(cpu, HL);
         uint8_t res = cpu->memory[addr];
         set_reg(cpu, (enum RegisterName)ld_target, res);
@@ -656,7 +656,7 @@ void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) { 
     }
 
     /* Load from register into address */
-    else if (ld_target == LO_HL_INC_IND) {
+    else if (ld_target == LO_HL_DEC_IND) {
         uint16_t addr = get_reg(cpu, HL);
         uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
         cpu->memory[addr] = res;
@@ -712,7 +712,6 @@ void pop(CPU *cpu, enum RegisterName target) {
     if (target == AF) {
         uint8_t val_lower = BYTE_M & val;
         cpu->flag_reg = byte_to_flag_reg(val_lower);
-        set_reg(cpu, F, val_lower);
     }
 
     set_reg(cpu, target, val);
@@ -724,7 +723,7 @@ uint16_t call(CPU *cpu, enum JumpCondition jump_cond) {
     bool jump = jump_test(cpu, jump_cond);
     if (jump) {
         stack_push(cpu, next_pc);
-        uint16_t addr = read_addr(cpu);
+        uint16_t addr = read_bbyte(cpu);
         return addr;
     }
 

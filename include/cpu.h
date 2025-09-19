@@ -36,14 +36,13 @@ void step(CPU *cpu);
 uint16_t execute(CPU *cpu, const Instruction *instruction);
 
 /* Register interactions */
-uint8_t get_reg(CPU *cpu, enum RegisterName reg);
-void set_reg(CPU *cpu, enum RegisterName reg, uint8_t val);
+uint16_t get_reg(CPU *cpu, enum RegisterName reg);
+void set_reg(CPU *cpu, enum RegisterName reg, uint16_t val);
 void print_reg(CPU *cpu, enum RegisterName reg);
 void print_regs(CPU *cpu);
 void update_flags(CPU *cpu, bool zero, bool subtract, bool half_carry, bool carry);
 
 /* Memory interactions */
-uint16_t read_addr(CPU *cpu);
 uint8_t read_byte(CPU *cpu);
 uint16_t read_bbyte(CPU *cpu);
 

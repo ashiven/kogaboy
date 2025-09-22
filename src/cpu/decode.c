@@ -18,6 +18,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x85:
             return new_add(L);
         case 0x86:
+            // TODO: this needs to be HL indirect
             return new_add(HL);
         case 0x87:
             return new_add(A);
@@ -30,8 +31,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x29:
             return new_add_hl(HL);
         case 0x39:
-            // TODO:
-            // return new_addhl(SP);
+            return new_add_hl(SP);
 
         /* ADC */
         case 0x88:
@@ -47,6 +47,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x8D:
             return new_adc(L);
         case 0x8E:
+            // TODO: this needs to be HL indirect
             return new_adc(HL);
         case 0x8F:
             return new_adc(A);
@@ -65,6 +66,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x95:
             return new_sub(L);
         case 0x96:
+            // TODO: this needs to be HL indirect
             return new_sub(HL);
         case 0x97:
             return new_sub(A);
@@ -83,6 +85,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x9D:
             return new_sbc(L);
         case 0x9E:
+            // TODO: this needs to be HL indirect
             return new_sbc(HL);
         case 0x9F:
             return new_sbc(A);
@@ -167,8 +170,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x23:
             return new_inc(HL);
         case 0x33:
-            // TODO:
-            // return new_inc(SP);
+            return new_inc(SP);
         case 0x04:
             return new_inc(B);
         case 0x14:
@@ -176,6 +178,7 @@ Instruction inst_from_byte(uint8_t byte) {
         case 0x24:
             return new_inc(H);
         case 0x34:
+            // TODO: should be HL indirect (addr at HL)
             return new_inc(HL);
         case 0x0C:
             return new_inc(C);
@@ -188,30 +191,30 @@ Instruction inst_from_byte(uint8_t byte) {
 
         /* DEC */
         case 0x0B:
-            return new_inc(BC);
+            return new_dec(BC);
         case 0x1B:
-            return new_inc(DE);
+            return new_dec(DE);
         case 0x2B:
-            return new_inc(HL);
+            return new_dec(HL);
         case 0x3B:
-            // TODO:
-            // return new_inc(SP);
+            return new_dec(SP);
         case 0x05:
-            return new_inc(B);
+            return new_dec(B);
         case 0x15:
-            return new_inc(D);
+            return new_dec(D);
         case 0x25:
-            return new_inc(H);
+            return new_dec(H);
         case 0x35:
-            return new_inc(HL);
+            // TODO: should be HL indirect (addr at HL)
+            return new_dec(HL);
         case 0x0D:
-            return new_inc(C);
+            return new_dec(C);
         case 0x1D:
-            return new_inc(E);
+            return new_dec(E);
         case 0x2D:
-            return new_inc(L);
+            return new_dec(L);
         case 0x3D:
-            return new_inc(A);
+            return new_dec(A);
 
         /* CCF */
         case 0x3F:
@@ -256,6 +259,18 @@ Instruction inst_from_byte(uint8_t byte) {
         /* JPHL */
         case 0xE9:
             return new_jphl();
+
+        /* JR */
+        case 0x20:
+            return new_jr(NOT_ZERO);
+        case 0x30:
+            return new_jr(NOT_CARRY);
+        case 0x18:
+            return new_jr(ALWAYS);
+        case 0x28:
+            return new_jr(ZERO);
+        case 0x38:
+            return new_jr(CARRY);
 
         /* LD_REG */
         case 0x40:
@@ -378,13 +393,13 @@ Instruction inst_from_byte(uint8_t byte) {
 
         /* LD_D16 */
         case 0x01:
-            return new_ld(LO_BC, LO_D8);
+            return new_ld(LO_BC, LO_D16);
         case 0x11:
-            return new_ld(LO_DE, LO_D8);
+            return new_ld(LO_DE, LO_D16);
         case 0x21:
-            return new_ld(LO_HL, LO_D8);
+            return new_ld(LO_HL, LO_D16);
         case 0x31:
-            return new_ld(LO_SP, LO_D8);
+            return new_ld(LO_SP, LO_D16);
 
         /* LD_D8_IND */
         case 0x36:
@@ -501,6 +516,10 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ret(CARRY);
         case 0xC9:
             return new_ret(ALWAYS);
+
+        /* NOP */
+        case 0x00:
+            return new_nop();
     }
 
     Instruction not_found = NOT_FOUND_INST;

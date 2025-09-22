@@ -18,8 +18,8 @@ jobs:
           sudo apt-get install -y make
           make install-deps
 
-      - name: Run Tests and Generate Coverage Report
-        run: make coverage
+      - name: Run Tests
+        run: make test
 #      - name: Upload Coverage Reports to Codecov
 #        uses: codecov/codecov-action@v5
 #        with:

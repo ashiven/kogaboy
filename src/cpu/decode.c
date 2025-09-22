@@ -24,11 +24,11 @@ Instruction inst_from_byte(uint8_t byte) {
 
         /* ADDHL */
         case 0x09:
-            return new_addhl(BC);
+            return new_add_hl(BC);
         case 0x19:
-            return new_addhl(DE);
+            return new_add_hl(DE);
         case 0x29:
-            return new_addhl(HL);
+            return new_add_hl(HL);
         case 0x39:
             // TODO:
             // return new_addhl(SP);
@@ -1063,8 +1063,8 @@ Instruction new_add(enum RegisterName target) {
     return add;
 }
 
-Instruction new_addhl(enum RegisterName target) {
-    Instruction addhl = {ADDHL, target, 0, ALWAYS, LO_A, LO_A};
+Instruction new_add_hl(enum RegisterName target) {
+    Instruction addhl = {ADD_HL, target, 0, ALWAYS, LO_A, LO_A};
     return addhl;
 }
 
@@ -1211,6 +1211,11 @@ Instruction new_jp(enum JumpCondition jump_cond) {
 Instruction new_jphl(void) {
     Instruction jumphl = {JPHL, A, 0, ALWAYS, LO_A, LO_A};
     return jumphl;
+}
+
+Instruction new_jr(enum JumpCondition jump_cond) {
+    Instruction jumpr = {JR, A, 0, jump_cond, LO_A, LO_A};
+    return jumpr;
 }
 
 Instruction new_ld(enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT

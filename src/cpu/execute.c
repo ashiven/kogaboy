@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "../../include/cpu.h"
 
 void add(CPU *cpu, enum RegisterName target) {
@@ -131,8 +133,8 @@ void cp(CPU *cpu, enum RegisterName target) {
 }
 
 void inc(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
-    uint8_t res = val + 1;
+    uint16_t val = get_reg(cpu, target);
+    uint16_t res = val + 1;
 
     // Flags are only affected when incrementing
     // a byte register as opposed to a 2-byte register.
@@ -150,8 +152,8 @@ void inc(CPU *cpu, enum RegisterName target) {
 }
 
 void dec(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
-    uint8_t res = val - 1;
+    uint16_t val = get_reg(cpu, target);
+    uint16_t res = val - 1;
 
     // TODO: same as above
     if (target < AF) {
@@ -555,6 +557,18 @@ uint16_t jp(CPU *cpu, enum JumpCondition jump_cond) {
 uint16_t jphl(CPU *cpu) {
     uint16_t addr = get_reg(cpu, HL);
     return addr;
+}
+
+uint16_t jr(CPU *cpu, enum JumpCondition jump_cond) {
+    uint8_t offset = read_byte(cpu);
+    int8_t offset_signed = (int8_t)offset;
+
+    bool jump = jump_test(cpu, jump_cond);
+    if (jump) {
+        return cpu->prog_count + offset_signed;
+    }
+
+    return cpu->prog_count + 2;
 }
 
 void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT

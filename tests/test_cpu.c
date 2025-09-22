@@ -42,7 +42,7 @@ void test_addhl(void) {
     execute(&cpu, &Iset);
     assert(get_hl(&cpu.registers) == BIN(0b0000000000001000));
 
-    Instruction Iaddhl = new_addhl(HL);
+    Instruction Iaddhl = new_add_hl(HL);
     execute(&cpu, &Iaddhl);
     assert(get_hl(&cpu.registers) == BIN(0b0000000000010000));
 }
@@ -524,6 +524,22 @@ void test_jphl() {
     assert(new_pc == BIN(0b0000000000000100));
 }
 
+void test_jr() {
+    CPU cpu = new_cpu();
+
+    Instruction Iset = new_set(7, F);  // NOLINT
+    execute(&cpu, &Iset);
+    assert(cpu.registers.f == BIN(0b10000000));
+    cpu.flag_reg.zero = true;
+
+    cpu.prog_count = 0x0012;  // NOLINT
+
+    Instruction Ijr = new_jr(ZERO);
+    cpu.memory[cpu.prog_count + 1] = 0xFE;  // signed offset NOLINT
+    uint16_t new_pc = execute(&cpu, &Ijr);
+    assert(new_pc == 0x0010);
+}
+
 void test_ld_reg() {
     CPU cpu = new_cpu();
 
@@ -748,9 +764,44 @@ void test_pop() {
     assert(cpu.flag_reg.carry);
 }
 
-// TODO: implement
-void test_call() {}
-void test_ret() {}
+void test_call() {
+    CPU cpu = new_cpu();
+    // NOTE: we will assume that the stack begins at the end of memory (growing downwards)
+    cpu.stack_pointer = 0xFFFE;  // NOLINT
+
+    cpu.prog_count = 0xFF00;                // NOLINT
+    cpu.memory[cpu.prog_count + 1] = 0xCD;  // NOLINT
+    cpu.memory[cpu.prog_count + 2] = 0xAB;  // NOLINT
+
+    Instruction Icall = new_call(NOT_ZERO);
+    uint16_t next_pc = execute(&cpu, &Icall);
+
+    assert(next_pc == 0xABCD);
+    assert(cpu.memory[0xFFFD] == 0xFF);
+    assert(cpu.memory[0xFFFC] == 0x03);
+}
+
+void test_ret() {
+    CPU cpu = new_cpu();
+    // NOTE: we will assume that the stack begins at the end of memory (growing downwards)
+    cpu.stack_pointer = 0xFFFE;  // NOLINT
+
+    cpu.prog_count = 0xFF00;                // NOLINT
+    cpu.memory[cpu.prog_count + 1] = 0xCD;  // NOLINT
+    cpu.memory[cpu.prog_count + 2] = 0xAB;  // NOLINT
+
+    Instruction Icall = new_call(NOT_ZERO);
+    uint16_t next_pc = execute(&cpu, &Icall);
+
+    assert(next_pc == 0xABCD);
+    assert(cpu.memory[0xFFFD] == 0xFF);
+    assert(cpu.memory[0xFFFC] == 0x03);
+
+    Instruction Iret = new_ret(NOT_CARRY);
+    next_pc = execute(&cpu, &Iret);
+
+    assert(next_pc == 0xFF03);
+}
 
 void test_nop() {
     CPU cpu = new_cpu();
@@ -794,6 +845,7 @@ int main() {
 
     test_jp();
     test_jphl();
+    test_jr();
 
     test_ld_reg();
     test_ld_d8();

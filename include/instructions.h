@@ -8,24 +8,24 @@
 // TODO: JR, LD_SP, EI, DI, HALT, RST...
 enum InstructionKind {  // NOLINT
     /* Arithmetic Instructions */
-    ADD,   /*Add target to register A*/
-    ADDHL, /*Add target to register HL*/
-    ADC,   /*Add target and value of carry flag to register A*/
-    SUB,   /*Subtract target from register A*/
-    SBC,   /*Subtract target and carry flag from register A*/
-    AND,   /*Bitwise AND between target and register A*/
-    OR,    /*Bitwise OR between target and register A*/
-    XOR,   /*Bitwise XOR between target and register A*/
-    CP,    /*Subtract without storing the result in A*/
-    INC,   /*Increment the value in target by 1*/
-    DEC,   /*Decrement the value in target by 1*/
-    CCF,   /*Toggle value of the carry flag*/
-    SCF,   /*Set carry flag to true*/
-    RRA,   /*Bit rotate right register A through carry flag*/
-    RLA,   /*Bit rotate left register A through carry flag*/
-    RRCA,  /*Bit rotate right register A and set carry flag*/
-    RLCA,  /*Bit rotate left register A and set carry flag*/
-    CPL,   /*Toggle every bit of the A register*/
+    ADD,    /*Add target to register A*/
+    ADD_HL, /*Add 16-bit target to register HL*/
+    ADC,    /*Add target and value of carry flag to register A*/
+    SUB,    /*Subtract target from register A*/
+    SBC,    /*Subtract target and carry flag from register A*/
+    AND,    /*Bitwise AND between target and register A*/
+    OR,     /*Bitwise OR between target and register A*/
+    XOR,    /*Bitwise XOR between target and register A*/
+    CP,     /*Subtract without storing the result in A*/
+    INC,    /*Increment the value in target by 1*/
+    DEC,    /*Decrement the value in target by 1*/
+    CCF,    /*Toggle value of the carry flag*/
+    SCF,    /*Set carry flag to true*/
+    RRA,    /*Bit rotate right register A through carry flag*/
+    RLA,    /*Bit rotate left register A through carry flag*/
+    RRCA,   /*Bit rotate right register A and set carry flag*/
+    RLCA,   /*Bit rotate left register A and set carry flag*/
+    CPL,    /*Toggle every bit of the A register*/
 
     /* Prefix Instructions */
     BIT,   /*Test whether a specific bit of target register is set*/
@@ -41,8 +41,9 @@ enum InstructionKind {  // NOLINT
     SWAP,  /*Swap the upper and lower halfs (4 Bits each) of the target*/
 
     /* Jump Instructions */
-    JP,   /*Jump to 8 or 16 bit-adjusted address based on a condition*/
-    JPHL, /*Jump to the address in register HL*/
+    JP,   /*Conditionally jump to a 16-bit address*/
+    JPHL, /*Conditionally jump to the address in register HL*/
+    JR,   /*Conditionally jump to program counter adjusted by an 8-bit signed integer*/
 
     /* Load Instructions */
     LD_REG,    /*Load the value from one register into another*/
@@ -132,7 +133,7 @@ Instruction pf_inst_from_byte(uint8_t byte);
 
 /* Arithmetic Instructions */
 Instruction new_add(enum RegisterName target);
-Instruction new_addhl(enum RegisterName target);
+Instruction new_add_hl(enum RegisterName target);
 Instruction new_adc(enum RegisterName target);
 Instruction new_sub(enum RegisterName target);
 Instruction new_sbc(enum RegisterName target);
@@ -166,7 +167,7 @@ Instruction new_swap(enum RegisterName target);
 /* Jump Instructions */
 Instruction new_jp(enum JumpCondition jump_cond);
 Instruction new_jphl(void);
-// Instruction new_jr(enum JumpCondition jump_cond);
+Instruction new_jr(enum JumpCondition jump_cond);
 
 /* Load Instructions */
 Instruction new_ld(enum LoadOperand ld_target, enum LoadOperand ld_source);

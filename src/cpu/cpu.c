@@ -32,7 +32,7 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
         case ADD:
             add(cpu, instruction->target);
             return cpu->prog_count + 1;
-        case ADDHL:
+        case ADD_HL:
             addhl(cpu, instruction->target);
             return cpu->prog_count + 1;
         case ADC:
@@ -124,6 +124,8 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
             return jp(cpu, instruction->jump_cond);
         case JPHL:
             return jphl(cpu);
+        case JR:
+            return jr(cpu, instruction->jump_cond);
 
         /* Load Instructions */
         case LD_REG:

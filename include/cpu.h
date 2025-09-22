@@ -85,6 +85,7 @@ void swap(CPU *cpu, enum RegisterName target);
 bool jump_test(const CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jp(CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jphl(CPU *cpu);
+uint16_t jr(CPU *cpu, enum JumpCondition jump_cond);
 
 void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
 void ld_d8(CPU *cpu, enum LoadOperand ld_target);

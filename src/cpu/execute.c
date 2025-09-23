@@ -2,6 +2,8 @@
 
 #include "../../include/cpu.h"
 
+// TODO: decrease code repetition in arithmetic ops via indirection of code coming after res = ...
+
 void add(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
     uint8_t val = get_reg(cpu, (enum RegisterName)source);
@@ -19,7 +21,7 @@ void add(CPU *cpu, enum Operand source) {
     set_reg(cpu, A, res);
 }
 
-void addhl(CPU *cpu, enum Operand source) {
+void add_hl(CPU *cpu, enum Operand source) {
     uint16_t acc = get_reg(cpu, HL);
     // val is one of the 16 bit regs: BC, DE, HL, SP
     uint16_t val = get_reg(cpu, (enum RegisterName)source);
@@ -34,9 +36,69 @@ void addhl(CPU *cpu, enum Operand source) {
     set_reg(cpu, HL, res);
 }
 
+void add_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t res = acc + val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = (acc & HBYTE_M) + (val & HBYTE_M) > HBYTE_M;
+    bool carry = acc + val > BYTE_M;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void add_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
+    uint8_t res = acc + val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = (acc & HBYTE_M) + (val & HBYTE_M) > HBYTE_M;
+    bool carry = acc + val > BYTE_M;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
 void adc(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
     uint8_t val = get_reg(cpu, (enum RegisterName)source);
+    uint8_t car = get_carry(&cpu->flag_reg);
+    uint8_t res = acc + val + car;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = (acc & HBYTE_M) + (val & HBYTE_M) + (car & HBYTE_M) > HBYTE_M;
+    bool carry = acc + val + car > BYTE_M;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void adc_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t car = get_carry(&cpu->flag_reg);
+    uint8_t res = acc + val + car;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = (acc & HBYTE_M) + (val & HBYTE_M) + (car & HBYTE_M) > HBYTE_M;
+    bool carry = acc + val + car > BYTE_M;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void adc_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
     uint8_t car = get_carry(&cpu->flag_reg);
     uint8_t res = acc + val + car;
 
@@ -63,9 +125,69 @@ void sub(CPU *cpu, enum Operand source) {
     set_reg(cpu, A, res);
 }
 
+void sub_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t res = acc - val;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M);
+    bool carry = acc < val;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void sub_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
+    uint8_t res = acc - val;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M);
+    bool carry = acc < val;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
 void sbc(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
     uint8_t val = get_reg(cpu, (enum RegisterName)source);
+    uint8_t car = get_carry(&cpu->flag_reg);
+    uint8_t res = acc - val - car;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M) + (car & HBYTE_M);
+    bool carry = acc < (val + car);
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void sbc_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t car = get_carry(&cpu->flag_reg);
+    uint8_t res = acc - val - car;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M) + (car & HBYTE_M);
+    bool carry = acc < (val + car);
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void sbc_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
     uint8_t car = get_carry(&cpu->flag_reg);
     uint8_t res = acc - val - car;
 
@@ -92,9 +214,67 @@ void and_(CPU *cpu, enum Operand source) {
     set_reg(cpu, A, res);
 }
 
+void and_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t res = acc && val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = true;
+    bool carry = false;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void and_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
+    uint8_t res = acc && val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = true;
+    bool carry = false;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
 void or_(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
     uint8_t val = get_reg(cpu, (enum RegisterName)source);
+    uint8_t res = acc || val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = true;
+    bool carry = false;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void or_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t res = acc || val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = true;
+    bool carry = false;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void or_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
     uint8_t res = acc || val;
 
     bool zero = res == 0;
@@ -120,9 +300,63 @@ void xor_(CPU *cpu, enum Operand source) {
     set_reg(cpu, A, res);
 }
 
+void xor_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t res = acc ^ val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = true;
+    bool carry = false;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
+void xor_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
+    uint8_t res = acc ^ val;
+
+    bool zero = res == 0;
+    bool subtract = false;
+    bool half_carry = true;
+    bool carry = false;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    set_reg(cpu, A, res);
+}
+
 void cp(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
     uint8_t val = get_reg(cpu, (enum RegisterName)source);
+    uint8_t res = acc - val;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M);
+    bool carry = acc < val;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+}
+
+void cp_ind(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint8_t res = acc - val;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (acc & HBYTE_M) < (val & HBYTE_M);
+    bool carry = acc < val;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+}
+
+void cp_d8(CPU *cpu) {
+    uint8_t acc = get_reg(cpu, A);
+    uint8_t val = read_byte(cpu);
     uint8_t res = acc - val;
 
     bool zero = res == 0;
@@ -151,6 +385,20 @@ void inc(CPU *cpu, enum Operand target) {
     set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
+void inc_ind(CPU *cpu) {
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint16_t res = val + 1;
+
+    bool zero = false;
+    bool subtract = false;
+    bool half_carry = (val & HBYTE_M) + 1 > HBYTE_M;
+    bool carry = cpu->flag_reg.carry;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    cpu->memory[addr] = res;
+}
+
 void dec(CPU *cpu, enum Operand target) {
     uint16_t val = get_reg(cpu, (enum RegisterName)target);
     uint16_t res = val - 1;
@@ -165,6 +413,20 @@ void dec(CPU *cpu, enum Operand target) {
     }
 
     set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
+}
+
+void dec_ind(CPU *cpu) {
+    uint16_t addr = get_reg(cpu, HL);
+    uint8_t val = cpu->memory[addr];
+    uint16_t res = val - 1;
+
+    bool zero = res == 0;
+    bool subtract = true;
+    bool half_carry = (val & HBYTE_M) >= 1;
+    bool carry = cpu->flag_reg.carry;
+    update_flags(cpu, zero, subtract, half_carry, carry);
+
+    cpu->memory[addr] = res;
 }
 
 void ccf(CPU *cpu) {
@@ -554,7 +816,7 @@ uint16_t jp(CPU *cpu, enum JumpCondition jump_cond) {
     return next_pc;
 }
 
-uint16_t jphl(CPU *cpu) {
+uint16_t jp_hl(CPU *cpu) {
     uint16_t addr = get_reg(cpu, HL);
     return addr;
 }

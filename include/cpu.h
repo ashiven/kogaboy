@@ -53,16 +53,34 @@ uint16_t stack_pop(CPU *cpu);
 
 /* Instruction implementations */
 void add(CPU *cpu, enum Operand source);
-void addhl(CPU *cpu, enum Operand source);
+void add_hl(CPU *cpu, enum Operand source);
+void add_ind(CPU *cpu);
+void add_d8(CPU *cpu);
 void adc(CPU *cpu, enum Operand source);
+void adc_ind(CPU *cpu);
+void adc_d8(CPU *cpu);
 void sub(CPU *cpu, enum Operand source);
+void sub_ind(CPU *cpu);
+void sub_d8(CPU *cpu);
 void sbc(CPU *cpu, enum Operand source);
+void sbc_ind(CPU *cpu);
+void sbc_d8(CPU *cpu);
 void and_(CPU *cpu, enum Operand source);
+void and_ind(CPU *cpu);
+void and_d8(CPU *cpu);
 void or_(CPU *cpu, enum Operand source);
+void or_ind(CPU *cpu);
+void or_d8(CPU *cpu);
 void xor_(CPU *cpu, enum Operand source);
+void xor_ind(CPU *cpu);
+void xor_d8(CPU *cpu);
 void cp(CPU *cpu, enum Operand source);
+void cp_ind(CPU *cpu);
+void cp_d8(CPU *cpu);
 void inc(CPU *cpu, enum Operand target);
+void inc_ind(CPU *cpu);
 void dec(CPU *cpu, enum Operand target);
+void dec_ind(CPU *cpu);
 void ccf(CPU *cpu);
 void scf(CPU *cpu);
 void rra(CPU *cpu);
@@ -85,7 +103,7 @@ void swap(CPU *cpu, enum Operand target);
 
 bool jump_test(const CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jp(CPU *cpu, enum JumpCondition jump_cond);
-uint16_t jphl(CPU *cpu);
+uint16_t jp_hl(CPU *cpu);
 uint16_t jr(CPU *cpu, enum JumpCondition jump_cond);
 
 void ld_reg(CPU *cpu, enum Operand target, enum Operand source);

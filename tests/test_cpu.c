@@ -42,7 +42,7 @@ void test_addhl(void) {
     execute(&cpu, &Iset);
     assert(get_hl(&cpu.registers) == BIN(0b0000000000001000));
 
-    Instruction Iaddhl = new_add_hl(O_HL);
+    Instruction Iaddhl = new_add(O_HL);
     execute(&cpu, &Iaddhl);
     assert(get_hl(&cpu.registers) == BIN(0b0000000000010000));
 }
@@ -519,7 +519,7 @@ void test_jphl() {
     execute(&cpu, &Iset);
     assert(get_reg(&cpu, HL) == BIN(0b0000000000000100));
 
-    Instruction Ijphl = new_jphl();
+    Instruction Ijphl = new_jp_hl();
     uint16_t new_pc = execute(&cpu, &Ijphl);
     assert(new_pc == BIN(0b0000000000000100));
 }

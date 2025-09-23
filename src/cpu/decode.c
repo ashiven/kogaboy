@@ -5,6 +5,8 @@
 Instruction inst_from_byte(uint8_t byte) {
     switch (byte) {
         /* ADD */
+        case 0x87:
+            return new_add(O_A);
         case 0x80:
             return new_add(O_B);
         case 0x81:
@@ -17,23 +19,28 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_add(O_H);
         case 0x85:
             return new_add(O_L);
-        case 0x86:
-            // TODO: this needs to be HL indirect
-            return new_add(O_HL);
-        case 0x87:
-            return new_add(O_A);
 
-        /* ADDHL */
+        /* ADD_HL */
         case 0x09:
-            return new_add_hl(O_BC);
+            return new_add(O_BC);
         case 0x19:
-            return new_add_hl(O_DE);
+            return new_add(O_DE);
         case 0x29:
-            return new_add_hl(O_HL);
+            return new_add(O_HL);
         case 0x39:
-            return new_add_hl(O_SP);
+            return new_add(O_SP);
+
+        /* ADD_IND */
+        case 0x86:
+            return new_add(O_HL_IND);
+
+        /* ADD_D8 */
+        case 0xC6:
+            return new_add(O_D8);
 
         /* ADC */
+        case 0x8F:
+            return new_adc(O_A);
         case 0x88:
             return new_adc(O_B);
         case 0x89:
@@ -46,13 +53,18 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_adc(O_H);
         case 0x8D:
             return new_adc(O_L);
+
+        /* ADC_IND */
         case 0x8E:
-            // TODO: this needs to be HL indirect
-            return new_adc(O_HL);
-        case 0x8F:
-            return new_adc(O_A);
+            return new_adc(O_HL_IND);
+
+        /* ADC_D8 */
+        case 0xCE:
+            return new_adc(O_D8);
 
         /* SUB */
+        case 0x97:
+            return new_sub(O_A);
         case 0x90:
             return new_sub(O_B);
         case 0x91:
@@ -65,13 +77,18 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_sub(O_H);
         case 0x95:
             return new_sub(O_L);
+
+        /* SUB_IND */
         case 0x96:
-            // TODO: this needs to be HL indirect
-            return new_sub(O_HL);
-        case 0x97:
-            return new_sub(O_A);
+            return new_sub(O_HL_IND);
+
+        /* SUB_D8 */
+        case 0xD6:
+            return new_sub(O_D8);
 
         /* SBC */
+        case 0x9F:
+            return new_sbc(O_A);
         case 0x98:
             return new_sbc(O_B);
         case 0x99:
@@ -84,13 +101,18 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_sbc(O_H);
         case 0x9D:
             return new_sbc(O_L);
+
+        /* SBC_IND */
         case 0x9E:
-            // TODO: this needs to be HL indirect
-            return new_sbc(O_HL);
-        case 0x9F:
-            return new_sbc(O_A);
+            return new_sbc(O_HL_IND);
+
+        /* SBC_D8 */
+        case 0xDE:
+            return new_sbc(O_D8);
 
         /* AND */
+        case 0xA7:
+            return new_and(O_A);
         case 0xA0:
             return new_and(O_B);
         case 0xA1:
@@ -103,12 +125,18 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_and(O_H);
         case 0xA5:
             return new_and(O_L);
+
+        /* AND_IND */
         case 0xA6:
-            return new_and(O_HL);
-        case 0xA7:
-            return new_and(O_A);
+            return new_and(O_HL_IND);
+
+        /* AND_D8 */
+        case 0xE6:
+            return new_and(O_D8);
 
         /* OR */
+        case 0xB7:
+            return new_or(O_A);
         case 0xB0:
             return new_or(O_B);
         case 0xB1:
@@ -121,12 +149,18 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_or(O_H);
         case 0xB5:
             return new_or(O_L);
+
+        /* OR_IND */
         case 0xB6:
-            return new_or(O_HL);
-        case 0xB7:
-            return new_or(O_A);
+            return new_or(O_HL_IND);
+
+        /* OR_D8 */
+        case 0xF6:
+            return new_or(O_D8);
 
         /* XOR */
+        case 0xAF:
+            return new_xor(O_A);
         case 0xA8:
             return new_xor(O_B);
         case 0xA9:
@@ -139,12 +173,18 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_xor(O_H);
         case 0xAD:
             return new_xor(O_L);
+
+        /* XOR_IND */
         case 0xAE:
-            return new_xor(O_HL);
-        case 0xAF:
-            return new_xor(O_A);
+            return new_xor(O_HL_IND);
+
+        /* XOR_D8 */
+        case 0xEE:
+            return new_xor(O_D8);
 
         /* CP */
+        case 0xBF:
+            return new_cp(O_A);
         case 0xB8:
             return new_cp(O_B);
         case 0xB9:
@@ -157,12 +197,30 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_cp(O_H);
         case 0xBD:
             return new_cp(O_L);
+
+        /* CP_IND */
         case 0xBE:
-            return new_cp(O_HL);
-        case 0xBF:
-            return new_cp(O_A);
+            return new_cp(O_HL_IND);
+
+        /* CP_D8 */
+        case 0xFE:
+            return new_cp(O_D8);
 
         /* INC */
+        case 0x3C:
+            return new_inc(O_A);
+        case 0x04:
+            return new_inc(O_B);
+        case 0x0C:
+            return new_inc(O_C);
+        case 0x14:
+            return new_inc(O_D);
+        case 0x1C:
+            return new_inc(O_E);
+        case 0x24:
+            return new_inc(O_H);
+        case 0x2C:
+            return new_inc(O_L);
         case 0x03:
             return new_inc(O_BC);
         case 0x13:
@@ -171,25 +229,26 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_inc(O_HL);
         case 0x33:
             return new_inc(O_SP);
-        case 0x04:
-            return new_inc(O_B);
-        case 0x14:
-            return new_inc(O_D);
-        case 0x24:
-            return new_inc(O_H);
+
+        /* INC_IND */
         case 0x34:
-            // TODO: should be HL indirect (addr at HL)
-            return new_inc(O_HL);
-        case 0x0C:
-            return new_inc(O_C);
-        case 0x1C:
-            return new_inc(O_E);
-        case 0x2C:
-            return new_inc(O_L);
-        case 0x3C:
-            return new_inc(O_A);
+            return new_inc(O_HL_IND);
 
         /* DEC */
+        case 0x3D:
+            return new_dec(O_A);
+        case 0x05:
+            return new_dec(O_B);
+        case 0x0D:
+            return new_dec(O_C);
+        case 0x15:
+            return new_dec(O_D);
+        case 0x1D:
+            return new_dec(O_E);
+        case 0x25:
+            return new_dec(O_H);
+        case 0x2D:
+            return new_dec(O_L);
         case 0x0B:
             return new_dec(O_BC);
         case 0x1B:
@@ -198,23 +257,10 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_dec(O_HL);
         case 0x3B:
             return new_dec(O_SP);
-        case 0x05:
-            return new_dec(O_B);
-        case 0x15:
-            return new_dec(O_D);
-        case 0x25:
-            return new_dec(O_H);
+
+        /* DEC_IND */
         case 0x35:
-            // TODO: should be HL indirect (addr at HL)
-            return new_dec(O_HL);
-        case 0x0D:
-            return new_dec(O_C);
-        case 0x1D:
-            return new_dec(O_E);
-        case 0x2D:
-            return new_dec(O_L);
-        case 0x3D:
-            return new_dec(O_A);
+            return new_dec(O_HL_IND);
 
         /* CCF */
         case 0x3F:
@@ -258,7 +304,7 @@ Instruction inst_from_byte(uint8_t byte) {
 
         /* JPHL */
         case 0xE9:
-            return new_jphl();
+            return new_jp_hl();
 
         /* JR */
         case 0x20:
@@ -273,6 +319,8 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_jr(CARRY);
 
         /* LD_REG */
+        case 0x47:
+            return new_ld(O_B, O_A);
         case 0x40:
             return new_ld(O_B, O_B);
         case 0x41:
@@ -285,8 +333,9 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_B, O_H);
         case 0x45:
             return new_ld(O_B, O_L);
-        case 0x47:
-            return new_ld(O_B, O_A);
+
+        case 0x4F:
+            return new_ld(O_C, O_A);
         case 0x48:
             return new_ld(O_C, O_B);
         case 0x49:
@@ -299,9 +348,9 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_C, O_H);
         case 0x4D:
             return new_ld(O_C, O_L);
-        case 0x4F:
-            return new_ld(O_C, O_A);
 
+        case 0x57:
+            return new_ld(O_D, O_A);
         case 0x50:
             return new_ld(O_D, O_B);
         case 0x51:
@@ -314,8 +363,9 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_D, O_H);
         case 0x55:
             return new_ld(O_D, O_L);
-        case 0x57:
-            return new_ld(O_D, O_A);
+
+        case 0x5F:
+            return new_ld(O_E, O_A);
         case 0x58:
             return new_ld(O_E, O_B);
         case 0x59:
@@ -328,9 +378,9 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_E, O_H);
         case 0x5D:
             return new_ld(O_E, O_L);
-        case 0x5F:
-            return new_ld(O_E, O_A);
 
+        case 0x67:
+            return new_ld(O_H, O_A);
         case 0x60:
             return new_ld(O_H, O_B);
         case 0x61:
@@ -343,8 +393,9 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_H, O_H);
         case 0x65:
             return new_ld(O_H, O_L);
-        case 0x67:
-            return new_ld(O_H, O_A);
+
+        case 0x6F:
+            return new_ld(O_L, O_A);
         case 0x68:
             return new_ld(O_L, O_B);
         case 0x69:
@@ -357,9 +408,9 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_L, O_H);
         case 0x6D:
             return new_ld(O_L, O_L);
-        case 0x6F:
-            return new_ld(O_L, O_A);
 
+        case 0x7F:
+            return new_ld(O_A, O_A);
         case 0x78:
             return new_ld(O_A, O_B);
         case 0x79:
@@ -372,24 +423,22 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_A, O_H);
         case 0x7D:
             return new_ld(O_A, O_L);
-        case 0x7F:
-            return new_ld(O_A, O_A);
 
         /* LD_D8 */
-        case 0x06:
-            return new_ld(O_B, O_D8);
-        case 0x16:
-            return new_ld(O_D, O_D8);
-        case 0x26:
-            return new_ld(O_H, O_D8);
-        case 0x0E:
-            return new_ld(O_C, O_D8);
-        case 0x1E:
-            return new_ld(O_E, O_D8);
-        case 0x2E:
-            return new_ld(O_L, O_D8);
         case 0x3E:
             return new_ld(O_A, O_D8);
+        case 0x06:
+            return new_ld(O_B, O_D8);
+        case 0x0E:
+            return new_ld(O_C, O_D8);
+        case 0x16:
+            return new_ld(O_D, O_D8);
+        case 0x1E:
+            return new_ld(O_E, O_D8);
+        case 0x26:
+            return new_ld(O_H, O_D8);
+        case 0x2E:
+            return new_ld(O_L, O_D8);
 
         /* LD_D16 */
         case 0x01:
@@ -414,20 +463,24 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_A, O_BC_IND);
         case 0x1A:
             return new_ld(O_A, O_DE_IND);
-        case 0x46:
-            return new_ld(O_B, O_HL_IND);
-        case 0x56:
-            return new_ld(O_D, O_HL_IND);
-        case 0x66:
-            return new_ld(O_H, O_HL_IND);
-        case 0x4E:
-            return new_ld(O_C, O_HL_IND);
-        case 0x5E:
-            return new_ld(O_E, O_HL_IND);
-        case 0x6E:
-            return new_ld(O_L, O_HL_IND);
+
         case 0x7E:
             return new_ld(O_A, O_HL_IND);
+        case 0x46:
+            return new_ld(O_B, O_HL_IND);
+        case 0x4E:
+            return new_ld(O_C, O_HL_IND);
+        case 0x56:
+            return new_ld(O_D, O_HL_IND);
+        case 0x5E:
+            return new_ld(O_E, O_HL_IND);
+        case 0x66:
+            return new_ld(O_H, O_HL_IND);
+        case 0x6E:
+            return new_ld(O_L, O_HL_IND);
+
+        case 0x77:
+            return new_ld(O_HL_IND, O_A);
         case 0x70:
             return new_ld(O_HL_IND, O_B);
         case 0x71:
@@ -440,8 +493,6 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ld(O_HL_IND, O_H);
         case 0x75:
             return new_ld(O_HL_IND, O_L);
-        case 0x77:
-            return new_ld(O_HL_IND, O_A);
 
         /* LD_ADDR */
         case 0xEA:
@@ -474,24 +525,24 @@ Instruction inst_from_byte(uint8_t byte) {
             return new_ldh(O_A, O_A8_IND);
 
         /* PUSH */
+        case 0xF5:
+            return new_push(O_AF);
         case 0xC5:
             return new_push(O_BC);
         case 0xD5:
             return new_push(O_DE);
         case 0xE5:
             return new_push(O_HL);
-        case 0xF5:
-            return new_push(O_AF);
 
         /* POP */
+        case 0xF1:
+            return new_pop(O_AF);
         case 0xC1:
             return new_pop(O_BC);
         case 0xD1:
             return new_pop(O_DE);
         case 0xE1:
             return new_pop(O_HL);
-        case 0xF1:
-            return new_pop(O_AF);
 
         /* CALL */
         case 0xC4:
@@ -1078,57 +1129,134 @@ Instruction pf_inst_from_byte(uint8_t byte) {
 // NOLINTEND
 
 Instruction new_add(enum Operand source) {
-    Instruction add = {ADD, 0, 0, O_A, source};
+    enum InstructionKind add_kind;
+    if (source == O_HL_IND) {
+        add_kind = ADD_IND;
+    } else if (source == O_D8) {
+        add_kind = ADD_D8;
+    } else if (O_AF <= source && source <= O_SP) {
+        add_kind = ADD_HL;
+    } else {
+        add_kind = ADD;
+    }
+
+    Instruction add = {add_kind, 0, 0, O_A, source};
     return add;
 }
 
-Instruction new_add_hl(enum Operand source) {
-    Instruction addhl = {ADD_HL, 0, 0, O_A, source};
-    return addhl;
-}
-
 Instruction new_adc(enum Operand source) {
-    Instruction adc = {ADC, 0, 0, O_A, source};
+    enum InstructionKind adc_kind;
+    if (source == O_HL_IND) {
+        adc_kind = ADC_IND;
+    } else if (source == O_D8) {
+        adc_kind = ADC_D8;
+    } else {
+        adc_kind = ADC;
+    }
+
+    Instruction adc = {adc_kind, 0, 0, O_A, source};
     return adc;
 }
 
 Instruction new_sub(enum Operand source) {
-    Instruction sub = {SUB, 0, 0, O_A, source};
+    enum InstructionKind sub_kind;
+    if (source == O_HL_IND) {
+        sub_kind = SUB_IND;
+    } else if (source == O_D8) {
+        sub_kind = SUB_D8;
+    } else {
+        sub_kind = SUB;
+    }
+
+    Instruction sub = {sub_kind, 0, 0, O_A, source};
     return sub;
 }
 
 Instruction new_sbc(enum Operand source) {
-    Instruction sbc = {SBC, 0, 0, O_A, source};
+    enum InstructionKind sbc_kind;
+    if (source == O_HL_IND) {
+        sbc_kind = SBC_IND;
+    } else if (source == O_D8) {
+        sbc_kind = SBC_D8;
+    } else {
+        sbc_kind = SBC;
+    }
+
+    Instruction sbc = {sbc_kind, 0, 0, O_A, source};
     return sbc;
 }
 
 Instruction new_and(enum Operand source) {
-    Instruction and = {AND, 0, 0, O_A, source};
+    enum InstructionKind and_kind;
+    if (source == O_HL_IND) {
+        and_kind = AND_IND;
+    } else if (source == O_D8) {
+        and_kind = AND_D8;
+    } else {
+        and_kind = AND;
+    }
+    Instruction and = {and_kind, 0, 0, O_A, source};
     return and;
 }
 
 Instruction new_or(enum Operand source) {
-    Instruction or_ = {OR, 0, 0, O_A, source};
+    enum InstructionKind or_kind;
+    if (source == O_HL_IND) {
+        or_kind = OR_IND;
+    } else if (source == O_D8) {
+        or_kind = OR_D8;
+    } else {
+        or_kind = OR;
+    }
+    Instruction or_ = {or_kind, 0, 0, O_A, source};
     return or_;
 }
 
 Instruction new_xor(enum Operand source) {
-    Instruction xor = {XOR, 0, 0, O_A, source};
+    enum InstructionKind xor_kind;
+    if (source == O_HL_IND) {
+        xor_kind = XOR_IND;
+    } else if (source == O_D8) {
+        xor_kind = XOR_D8;
+    } else {
+        xor_kind = XOR;
+    }
+    Instruction xor = {xor_kind, 0, 0, O_A, source};
     return xor;
 }
 
 Instruction new_cp(enum Operand source) {
-    Instruction cp_ = {CP, 0, 0, O_A, source};
+    enum InstructionKind cp_kind;
+    if (source == O_HL_IND) {
+        cp_kind = CP_IND;
+    } else if (source == O_D8) {
+        cp_kind = CP_D8;
+    } else {
+        cp_kind = CP;
+    }
+    Instruction cp_ = {cp_kind, 0, 0, O_A, source};
     return cp_;
 }
 
 Instruction new_inc(enum Operand target) {
-    Instruction inc = {INC, 0, 0, O_A, target};
+    enum InstructionKind inc_kind;
+    if (target == O_HL_IND) {
+        inc_kind = INC_IND;
+    } else {
+        inc_kind = INC;
+    }
+    Instruction inc = {inc_kind, 0, 0, O_A, target};
     return inc;
 }
 
 Instruction new_dec(enum Operand target) {
-    Instruction dec = {DEC, 0, 0, O_A, target};
+    enum InstructionKind dec_kind;
+    if (target == O_HL_IND) {
+        dec_kind = DEC_IND;
+    } else {
+        dec_kind = DEC;
+    }
+    Instruction dec = {dec_kind, 0, 0, O_A, target};
     return dec;
 }
 
@@ -1227,8 +1355,8 @@ Instruction new_jp(enum JumpCondition jump_cond) {
     return jump;
 }
 
-Instruction new_jphl(void) {
-    Instruction jumphl = {JPHL, 0, ALWAYS, 0, 0};
+Instruction new_jp_hl(void) {
+    Instruction jumphl = {JP_HL, 0, ALWAYS, 0, 0};
     return jumphl;
 }
 

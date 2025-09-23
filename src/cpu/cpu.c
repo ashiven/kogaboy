@@ -33,34 +33,88 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
             add(cpu, instruction->source);
             return cpu->prog_count + 1;
         case ADD_HL:
-            addhl(cpu, instruction->source);
+            add_hl(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case ADD_IND:
+            add_ind(cpu);
+            return cpu->prog_count + 1;
+        case ADD_D8:
+            add_d8(cpu);
+            return cpu->prog_count + 2;
         case ADC:
             adc(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case ADC_IND:
+            adc_ind(cpu);
+            return cpu->prog_count + 1;
+        case ADC_D8:
+            adc_d8(cpu);
+            return cpu->prog_count + 2;
         case SUB:
             sub(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case SUB_IND:
+            sub_ind(cpu);
+            return cpu->prog_count + 1;
+        case SUB_D8:
+            sub_d8(cpu);
+            return cpu->prog_count + 2;
         case SBC:
             sbc(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case SBC_IND:
+            sbc_ind(cpu);
+            return cpu->prog_count + 1;
+        case SBC_D8:
+            sbc_d8(cpu);
+            return cpu->prog_count + 2;
         case AND:
             and_(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case AND_IND:
+            and_ind(cpu);
+            return cpu->prog_count + 1;
+        case AND_D8:
+            and_d8(cpu);
+            return cpu->prog_count + 2;
         case OR:
             or_(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case OR_IND:
+            or_ind(cpu);
+            return cpu->prog_count + 1;
+        case OR_D8:
+            or_d8(cpu);
+            return cpu->prog_count + 2;
         case XOR:
             xor_(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case XOR_IND:
+            xor_ind(cpu);
+            return cpu->prog_count + 1;
+        case XOR_D8:
+            xor_d8(cpu);
+            return cpu->prog_count + 2;
         case CP:
             cp(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case CP_IND:
+            cp_ind(cpu);
+            return cpu->prog_count + 1;
+        case CP_D8:
+            cp_d8(cpu);
+            return cpu->prog_count + 2;
         case INC:
             inc(cpu, instruction->source);
             return cpu->prog_count + 1;
+        case INC_IND:
+            inc_ind(cpu);
+            return cpu->prog_count + 1;
         case DEC:
             dec(cpu, instruction->source);
+            return cpu->prog_count + 1;
+        case DEC_IND:
+            dec_ind(cpu);
             return cpu->prog_count + 1;
         case CCF:
             ccf(cpu);
@@ -122,8 +176,8 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
         /* Jump Instructions */
         case JP:
             return jp(cpu, instruction->jump_cond);
-        case JPHL:
-            return jphl(cpu);
+        case JP_HL:
+            return jp_hl(cpu);
         case JR:
             return jr(cpu, instruction->jump_cond);
 

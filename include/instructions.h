@@ -1,9 +1,6 @@
 #include <stdint.h>
 
-#include "../include/registers.h"
-
-// == Inst(kind=ADD, target=A, bit_index=7, jump_cond=NOT_ZERO, ld_target=LO_A, ld_source=LO_A)
-#define NOT_FOUND_INST {0, 0, 7, 0, 0, 0}
+#define NOT_FOUND_INST {0, 0, 0, 0, 0}
 
 // TODO: JR, LD_SP, EI, DI, HALT, RST...
 enum InstructionKind {  // NOLINT
@@ -80,41 +77,38 @@ enum JumpCondition {  // NOLINT
 };
 
 // NOTE: Make sure that the order of the registers matches that in
-// enum RegisterName so we can use them interchangeably to refer to registers.
+// enum Operand so we can use them interchangeably to refer to registers.
 // (Remember that the underlying type of an enum is simply an integer)
-enum LoadOperand {  // NOLINT
-    LO_A,
-    LO_B,
-    LO_C,
-    LO_D,
-    LO_E,
-    LO_F,
-    LO_H,
-    LO_L,
-    LO_AF,
-    LO_BC,
-    LO_DE,
-    LO_HL,
-    LO_SP,
-    LO_C_IND,
-    LO_BC_IND,
-    LO_DE_IND,
-    LO_HL_IND,
-    LO_HL_INC_IND,
-    LO_HL_DEC_IND,
-    LO_D8,
-    LO_D16,
-    LO_A8_IND,
-    LO_A16_IND,
+enum Operand {  // NOLINT
+    O_A,
+    O_B,
+    O_C,
+    O_D,
+    O_E,
+    O_F,
+    O_H,
+    O_L,
+    O_AF,
+    O_BC,
+    O_DE,
+    O_HL,
+    O_SP,
+    O_C_IND,
+    O_BC_IND,
+    O_DE_IND,
+    O_HL_IND,
+    O_HL_INC_IND,
+    O_HL_DEC_IND,
+    O_D8,
+    O_D16,
+    O_A8_IND,
+    O_A16_IND,
 };
 
 // TODO: embed generic Instruction inside of specific
 // instructions like: ArithInstr, PrefixInstr, JumpInstr, LoadInstr ...
 typedef struct {
     enum InstructionKind kind;
-
-    /* Arithmetic & Prefix Instructions */
-    enum RegisterName target;
 
     /* Prefix Instructions */
     uint8_t bit_index;
@@ -123,8 +117,8 @@ typedef struct {
     enum JumpCondition jump_cond;
 
     /* Load Instructions */
-    enum LoadOperand ld_target;
-    enum LoadOperand ld_source;
+    enum Operand target;
+    enum Operand source;
 } Instruction;
 
 /* Instruction Decoding */
@@ -132,17 +126,17 @@ Instruction inst_from_byte(uint8_t byte);
 Instruction pf_inst_from_byte(uint8_t byte);
 
 /* Arithmetic Instructions */
-Instruction new_add(enum RegisterName target);
-Instruction new_add_hl(enum RegisterName target);
-Instruction new_adc(enum RegisterName target);
-Instruction new_sub(enum RegisterName target);
-Instruction new_sbc(enum RegisterName target);
-Instruction new_and(enum RegisterName target);
-Instruction new_or(enum RegisterName target);
-Instruction new_xor(enum RegisterName target);
-Instruction new_cp(enum RegisterName target);
-Instruction new_inc(enum RegisterName target);
-Instruction new_dec(enum RegisterName target);
+Instruction new_add(enum Operand source);
+Instruction new_add_hl(enum Operand source);
+Instruction new_adc(enum Operand source);
+Instruction new_sub(enum Operand source);
+Instruction new_sbc(enum Operand source);
+Instruction new_and(enum Operand source);
+Instruction new_or(enum Operand source);
+Instruction new_xor(enum Operand source);
+Instruction new_cp(enum Operand source);
+Instruction new_inc(enum Operand target);
+Instruction new_dec(enum Operand target);
 Instruction new_ccf(void);
 Instruction new_scf(void);
 Instruction new_rra(void);
@@ -152,17 +146,17 @@ Instruction new_rlca(void);
 Instruction new_cpl(void);
 
 /* Prefix Instructions - Bits, Shifts, and Rotations */
-Instruction new_bit(uint8_t bit_index, enum RegisterName target);
-Instruction new_reset(uint8_t bit_index, enum RegisterName target);
-Instruction new_set(uint8_t bit_index, enum RegisterName target);
-Instruction new_srl(enum RegisterName target);
-Instruction new_rr(enum RegisterName target);
-Instruction new_rl(enum RegisterName target);
-Instruction new_rrc(enum RegisterName target);
-Instruction new_rlc(enum RegisterName target);
-Instruction new_sra(enum RegisterName target);
-Instruction new_sla(enum RegisterName target);
-Instruction new_swap(enum RegisterName target);
+Instruction new_bit(uint8_t bit_index, enum Operand target);
+Instruction new_reset(uint8_t bit_index, enum Operand target);
+Instruction new_set(uint8_t bit_index, enum Operand target);
+Instruction new_srl(enum Operand target);
+Instruction new_rr(enum Operand target);
+Instruction new_rl(enum Operand target);
+Instruction new_rrc(enum Operand target);
+Instruction new_rlc(enum Operand target);
+Instruction new_sra(enum Operand target);
+Instruction new_sla(enum Operand target);
+Instruction new_swap(enum Operand target);
 
 /* Jump Instructions */
 Instruction new_jp(enum JumpCondition jump_cond);
@@ -170,12 +164,12 @@ Instruction new_jphl(void);
 Instruction new_jr(enum JumpCondition jump_cond);
 
 /* Load Instructions */
-Instruction new_ld(enum LoadOperand ld_target, enum LoadOperand ld_source);
-Instruction new_ldh(enum LoadOperand ld_target, enum LoadOperand ld_source);
+Instruction new_ld(enum Operand target, enum Operand source);
+Instruction new_ldh(enum Operand target, enum Operand source);
 
 /* Stack Instructions */
-Instruction new_push(enum RegisterName target);
-Instruction new_pop(enum RegisterName target);
+Instruction new_push(enum Operand source);
+Instruction new_pop(enum Operand target);
 
 /* Call and Return Instructions */
 Instruction new_call(enum JumpCondition jump_cond);

@@ -2,9 +2,9 @@
 
 #include "../../include/cpu.h"
 
-void add(CPU *cpu, enum RegisterName target) {
+void add(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     // This will wrap around i.e.
     // acc = 1111_1111 and val = 0000_0010
     // --> res = 0000_0001
@@ -19,10 +19,10 @@ void add(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void addhl(CPU *cpu, enum RegisterName target) {
+void addhl(CPU *cpu, enum Operand source) {
     uint16_t acc = get_reg(cpu, HL);
     // val is one of the 16 bit regs: BC, DE, HL, SP
-    uint16_t val = get_reg(cpu, target);
+    uint16_t val = get_reg(cpu, (enum RegisterName)source);
     uint16_t res = acc + val;
 
     bool zero = res == 0;
@@ -34,9 +34,9 @@ void addhl(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, HL, res);
 }
 
-void adc(CPU *cpu, enum RegisterName target) {
+void adc(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t car = get_carry(&cpu->flag_reg);
     uint8_t res = acc + val + car;
 
@@ -49,9 +49,9 @@ void adc(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void sub(CPU *cpu, enum RegisterName target) {
+void sub(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t res = acc - val;
 
     bool zero = res == 0;
@@ -63,9 +63,9 @@ void sub(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void sbc(CPU *cpu, enum RegisterName target) {
+void sbc(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t car = get_carry(&cpu->flag_reg);
     uint8_t res = acc - val - car;
 
@@ -78,9 +78,9 @@ void sbc(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void and_(CPU *cpu, enum RegisterName target) {
+void and_(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t res = acc && val;
 
     bool zero = res == 0;
@@ -92,9 +92,9 @@ void and_(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void or_(CPU *cpu, enum RegisterName target) {
+void or_(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t res = acc || val;
 
     bool zero = res == 0;
@@ -106,9 +106,9 @@ void or_(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void xor_(CPU *cpu, enum RegisterName target) {
+void xor_(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t res = acc ^ val;
 
     bool zero = res == 0;
@@ -120,9 +120,9 @@ void xor_(CPU *cpu, enum RegisterName target) {
     set_reg(cpu, A, res);
 }
 
-void cp(CPU *cpu, enum RegisterName target) {
+void cp(CPU *cpu, enum Operand source) {
     uint8_t acc = get_reg(cpu, A);
-    uint8_t val = get_reg(cpu, target);
+    uint8_t val = get_reg(cpu, (enum RegisterName)source);
     uint8_t res = acc - val;
 
     bool zero = res == 0;
@@ -132,15 +132,15 @@ void cp(CPU *cpu, enum RegisterName target) {
     update_flags(cpu, zero, subtract, half_carry, carry);
 }
 
-void inc(CPU *cpu, enum RegisterName target) {
-    uint16_t val = get_reg(cpu, target);
+void inc(CPU *cpu, enum Operand target) {
+    uint16_t val = get_reg(cpu, (enum RegisterName)target);
     uint16_t res = val + 1;
 
     // Flags are only affected when incrementing
     // a byte register as opposed to a 2-byte register.
     // TODO: Look into zero if the values inside of the
     // registers are actually representations of signed integers
-    if (target < AF) {
+    if (target < O_AF) {
         bool zero = false;
         bool subtract = false;
         bool half_carry = (val & HBYTE_M) + 1 > HBYTE_M;
@@ -148,15 +148,15 @@ void inc(CPU *cpu, enum RegisterName target) {
         update_flags(cpu, zero, subtract, half_carry, carry);
     }
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
-void dec(CPU *cpu, enum RegisterName target) {
-    uint16_t val = get_reg(cpu, target);
+void dec(CPU *cpu, enum Operand target) {
+    uint16_t val = get_reg(cpu, (enum RegisterName)target);
     uint16_t res = val - 1;
 
     // TODO: same as above
-    if (target < AF) {
+    if (target < O_AF) {
         bool zero = res == 0;
         bool subtract = true;
         bool half_carry = (val & HBYTE_M) >= 1;
@@ -164,7 +164,7 @@ void dec(CPU *cpu, enum RegisterName target) {
         update_flags(cpu, zero, subtract, half_carry, carry);
     }
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 void ccf(CPU *cpu) {
@@ -288,8 +288,8 @@ void cpl(CPU *cpu) {
     set_reg(cpu, A, res);
 }
 
-void bit(CPU *cpu, uint8_t bit_index, enum RegisterName target) {  // NOLINT
-    uint8_t val = get_reg(cpu, target);
+void bit(CPU *cpu, uint8_t bit_index, enum Operand target) {  // NOLINT
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t bit = (val >> bit_index) & 1;
 
     bool zero = bit == 0;
@@ -308,11 +308,11 @@ void bit(CPU *cpu, uint8_t bit_index, enum RegisterName target) {  // NOLINT
  *
  * 1  0  1  1  1  1  1  1
  * */
-void reset(CPU *cpu, uint8_t bit_index, enum RegisterName target) {  // NOLINT
-    uint8_t val = get_reg(cpu, target);
+void reset(CPU *cpu, uint8_t bit_index, enum Operand target) {  // NOLINT
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t res = val & ~(1 << bit_index);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Set bit at bit_index to 1
@@ -324,11 +324,11 @@ void reset(CPU *cpu, uint8_t bit_index, enum RegisterName target) {  // NOLINT
  *
  * 0  1  0  0  0  0  0  0
  * */
-void set(CPU *cpu, uint8_t bit_index, enum RegisterName target) {  // NOLINT
-    uint8_t val = get_reg(cpu, target);
+void set(CPU *cpu, uint8_t bit_index, enum Operand target) {  // NOLINT
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t res = val | (1 << bit_index);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Shift target right into carry
@@ -340,8 +340,8 @@ void set(CPU *cpu, uint8_t bit_index, enum RegisterName target) {  // NOLINT
  *
  * b0  0 b7 b6 b5 b4 b3 b2 b1
  */
-void srl(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void srl(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t lsb = val & 1;
     uint8_t res = val >> 1;
 
@@ -351,7 +351,7 @@ void srl(CPU *cpu, enum RegisterName target) {
     bool carry = lsb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Rotate target right through carry
@@ -363,8 +363,8 @@ void srl(CPU *cpu, enum RegisterName target) {
  *
  * b0  c b7 b6 b5 b4 b3 b2 b1
  */
-void rr(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void rr(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t lsb = val & 1;
     uint8_t car = get_carry(&cpu->flag_reg);
     uint8_t res = car << MSB_IDX | val >> 1;
@@ -375,7 +375,7 @@ void rr(CPU *cpu, enum RegisterName target) {
     bool carry = lsb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Rotate target left through carry
@@ -387,8 +387,8 @@ void rr(CPU *cpu, enum RegisterName target) {
  *
  * b7  b6 b5 b4 b3 b2 b1 b0 c
  */
-void rl(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void rl(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t msb = (val >> MSB_IDX) & 1;
     uint8_t car = get_carry(&cpu->flag_reg);
     uint8_t res = val << 1 | car;
@@ -399,7 +399,7 @@ void rl(CPU *cpu, enum RegisterName target) {
     bool carry = msb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Rotate target right and set carry to lsb
@@ -410,8 +410,8 @@ void rl(CPU *cpu, enum RegisterName target) {
  *
  * b0  b0 b7 b6 b5 b4 b3 b2 b1
  */
-void rrc(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void rrc(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t lsb = val & 1;
     uint8_t res = (lsb << MSB_IDX) | val >> 1;
 
@@ -421,7 +421,7 @@ void rrc(CPU *cpu, enum RegisterName target) {
     bool carry = lsb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Rotate A left and set carry to msb
@@ -432,8 +432,8 @@ void rrc(CPU *cpu, enum RegisterName target) {
  *
  * b7  b6 b5 b4 b3 b2 b1 b0 b7
  */
-void rlc(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void rlc(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t msb = (val >> MSB_IDX) & 1;
     uint8_t res = val << 1 | msb;
 
@@ -443,7 +443,7 @@ void rlc(CPU *cpu, enum RegisterName target) {
     bool carry = msb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Shift target right into carry (also sign extend)
@@ -455,8 +455,8 @@ void rlc(CPU *cpu, enum RegisterName target) {
  *
  * b0 b7 b7 b6 b5 b4 b3 b2 b1
  */
-void sra(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void sra(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t lsb = val & 1;
     uint8_t msb = (val >> MSB_IDX) & 1;
     uint8_t res = msb << MSB_IDX | val >> 1;
@@ -467,7 +467,7 @@ void sra(CPU *cpu, enum RegisterName target) {
     bool carry = lsb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 /* Shift target left into carry
@@ -477,8 +477,8 @@ void sra(CPU *cpu, enum RegisterName target) {
  *
  * b7 b6 b5 b4 b3 b2 b1 b0 0
  */
-void sla(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void sla(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t msb = (val >> MSB_IDX) & 1;
     uint8_t res = val << 1;
 
@@ -488,11 +488,11 @@ void sla(CPU *cpu, enum RegisterName target) {
     bool carry = msb == 1;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
-void swap(CPU *cpu, enum RegisterName target) {
-    uint8_t val = get_reg(cpu, target);
+void swap(CPU *cpu, enum Operand target) {
+    uint8_t val = get_reg(cpu, (enum RegisterName)target);
     uint8_t lower_nibble = val & HBYTE_M;
     uint8_t upper_nibble = (val >> 4) & HBYTE_M;
     uint8_t res = lower_nibble << 4 | upper_nibble;
@@ -503,7 +503,7 @@ void swap(CPU *cpu, enum RegisterName target) {
     bool carry = false;
     update_flags(cpu, zero, subtract, half_carry, carry);
 
-    set_reg(cpu, target, res);  // NOLINT
+    set_reg(cpu, (enum RegisterName)target, res);  // NOLINT
 }
 
 bool jump_test(const CPU *cpu, enum JumpCondition jump_cond) {
@@ -571,19 +571,19 @@ uint16_t jr(CPU *cpu, enum JumpCondition jump_cond) {
     return cpu->prog_count + 2;
 }
 
-void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
-    uint16_t res = get_reg(cpu, (enum RegisterName)ld_source);
-    set_reg(cpu, (enum RegisterName)ld_target, res);
+void ld_reg(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
+    uint16_t res = get_reg(cpu, (enum RegisterName)source);
+    set_reg(cpu, (enum RegisterName)target, res);
 }
 
-void ld_d8(CPU *cpu, enum LoadOperand ld_target) {
+void ld_d8(CPU *cpu, enum Operand target) {
     uint8_t res = cpu->memory[cpu->prog_count + 1];
-    set_reg(cpu, (enum RegisterName)ld_target, res);
+    set_reg(cpu, (enum RegisterName)target, res);
 }
 
-void ld_d16(CPU *cpu, enum LoadOperand ld_target) {
+void ld_d16(CPU *cpu, enum Operand target) {
     uint16_t res = read_bbyte(cpu);
-    set_reg(cpu, (enum RegisterName)ld_target, res);
+    set_reg(cpu, (enum RegisterName)target, res);
 }
 
 void ld_d8_ind(CPU *cpu) {
@@ -592,13 +592,13 @@ void ld_d8_ind(CPU *cpu) {
     cpu->memory[addr] = res;
 }
 
-void ld_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+void ld_ind(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
     /* Load from address into register */
-    if (LO_BC_IND <= ld_source && ld_source <= LO_HL_IND) {
+    if (O_BC_IND <= source && source <= O_HL_IND) {
         enum RegisterName addr_reg;
-        if (ld_source == LO_BC_IND) {
+        if (source == O_BC_IND) {
             addr_reg = BC;
-        } else if (ld_source == LO_DE_IND) {
+        } else if (source == O_DE_IND) {
             addr_reg = DE;
         } else {
             addr_reg = HL;
@@ -606,129 +606,129 @@ void ld_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) { 
         uint16_t addr = get_reg(cpu, addr_reg);
         uint8_t res = cpu->memory[addr];
 
-        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, (enum RegisterName)target, res);
     }
 
     /* Load from register into address */
-    else if (LO_BC_IND <= ld_target && ld_target <= LO_HL_IND) {
+    else if (O_BC_IND <= target && target <= O_HL_IND) {
         enum RegisterName addr_reg;
-        if (ld_target == LO_BC_IND) {
+        if (target == O_BC_IND) {
             addr_reg = BC;
-        } else if (ld_target == LO_DE_IND) {
+        } else if (target == O_DE_IND) {
             addr_reg = DE;
         } else {
             addr_reg = HL;
         }
         uint16_t addr = get_reg(cpu, addr_reg);
-        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);  // NOLINT
+        uint8_t res = get_reg(cpu, (enum RegisterName)source);  // NOLINT
 
         cpu->memory[addr] = res;
     }
 }
 
-void ld_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+void ld_addr(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
     /* Load from address into register */
-    if (ld_source == LO_A16_IND) {
+    if (source == O_A16_IND) {
         uint16_t addr = read_bbyte(cpu);
         uint8_t res = cpu->memory[addr];
-        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, (enum RegisterName)target, res);
     }
 
     /* Load from register into address */
-    else if (ld_target == LO_A16_IND) {
+    else if (target == O_A16_IND) {
         uint16_t addr = read_bbyte(cpu);
-        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        uint8_t res = get_reg(cpu, (enum RegisterName)source);
         cpu->memory[addr] = res;
     }
 }
 
-void ld_inc(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+void ld_inc(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
     /* Load from address into register */
-    if (ld_source == LO_HL_INC_IND) {
+    if (source == O_HL_INC_IND) {
         uint16_t addr = get_reg(cpu, HL);
         uint8_t res = cpu->memory[addr];
-        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, (enum RegisterName)target, res);
         set_reg(cpu, HL, addr + 1);
     }
 
     /* Load from register into address */
-    else if (ld_target == LO_HL_INC_IND) {
+    else if (target == O_HL_INC_IND) {
         uint16_t addr = get_reg(cpu, HL);
-        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        uint8_t res = get_reg(cpu, (enum RegisterName)source);
         cpu->memory[addr] = res;
         set_reg(cpu, HL, addr + 1);
     }
 }
 
-void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+void ld_dec(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
     /* Load from address into register */
-    if (ld_source == LO_HL_DEC_IND) {
+    if (source == O_HL_DEC_IND) {
         uint16_t addr = get_reg(cpu, HL);
         uint8_t res = cpu->memory[addr];
-        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, (enum RegisterName)target, res);
         set_reg(cpu, HL, addr - 1);
     }
 
     /* Load from register into address */
-    else if (ld_target == LO_HL_DEC_IND) {
+    else if (target == O_HL_DEC_IND) {
         uint16_t addr = get_reg(cpu, HL);
-        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        uint8_t res = get_reg(cpu, (enum RegisterName)source);
         cpu->memory[addr] = res;
         set_reg(cpu, HL, addr - 1);
     }
 }
 
-void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+void ldh_ind(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
     /* Load from half address into register */
-    if (ld_source == LO_C_IND) {
+    if (source == O_C_IND) {
         uint8_t lower_addr = get_reg(cpu, C);
         uint16_t addr = UPPER_BYTE_M | lower_addr;
         uint8_t res = cpu->memory[addr];
-        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, (enum RegisterName)target, res);
     }
 
     /* Load register into half address */
-    else if (ld_target == LO_C_IND) {
+    else if (target == O_C_IND) {
         uint8_t lower_addr = get_reg(cpu, C);
         uint16_t addr = UPPER_BYTE_M | lower_addr;
-        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        uint8_t res = get_reg(cpu, (enum RegisterName)source);
         cpu->memory[addr] = res;
     }
 }
 
-void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source) {  // NOLINT
+void ldh_addr(CPU *cpu, enum Operand target, enum Operand source) {  // NOLINT
     /* Load from half address into register */
-    if (ld_source == LO_A8_IND) {
+    if (source == O_A8_IND) {
         uint8_t lower_addr = read_byte(cpu);
         uint16_t addr = UPPER_BYTE_M | lower_addr;
         uint8_t res = cpu->memory[addr];
-        set_reg(cpu, (enum RegisterName)ld_target, res);
+        set_reg(cpu, (enum RegisterName)target, res);
     }
 
     /* Load register into half address */
-    else if (ld_target == LO_A8_IND) {
+    else if (target == O_A8_IND) {
         uint8_t lower_addr = read_byte(cpu);
         uint16_t addr = UPPER_BYTE_M | lower_addr;
-        uint8_t res = get_reg(cpu, (enum RegisterName)ld_source);
+        uint8_t res = get_reg(cpu, (enum RegisterName)source);
         cpu->memory[addr] = res;
     }
 }
 
-void push(CPU *cpu, enum RegisterName target) {
-    uint16_t val = get_reg(cpu, target);
+void push(CPU *cpu, enum Operand source) {
+    uint16_t val = get_reg(cpu, (enum RegisterName)source);
     stack_push(cpu, val);
 }
 
-void pop(CPU *cpu, enum RegisterName target) {
+void pop(CPU *cpu, enum Operand target) {
     uint16_t val = stack_pop(cpu);
 
     /* Update flag register with F when popping AF */
-    if (target == AF) {
+    if (target == O_AF) {
         uint8_t val_lower = BYTE_M & val;
         cpu->flag_reg = byte_to_flag_reg(val_lower);
     }
 
-    set_reg(cpu, target, val);
+    set_reg(cpu, (enum RegisterName)target, val);
 }
 
 uint16_t call(CPU *cpu, enum JumpCondition jump_cond) {

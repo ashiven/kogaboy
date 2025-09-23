@@ -30,37 +30,37 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
     switch (instruction->kind) {
         /* Arithmetic Instructions */
         case ADD:
-            add(cpu, instruction->target);
+            add(cpu, instruction->source);
             return cpu->prog_count + 1;
         case ADD_HL:
-            addhl(cpu, instruction->target);
+            addhl(cpu, instruction->source);
             return cpu->prog_count + 1;
         case ADC:
-            adc(cpu, instruction->target);
+            adc(cpu, instruction->source);
             return cpu->prog_count + 1;
         case SUB:
-            sub(cpu, instruction->target);
+            sub(cpu, instruction->source);
             return cpu->prog_count + 1;
         case SBC:
-            sbc(cpu, instruction->target);
+            sbc(cpu, instruction->source);
             return cpu->prog_count + 1;
         case AND:
-            and_(cpu, instruction->target);
+            and_(cpu, instruction->source);
             return cpu->prog_count + 1;
         case OR:
-            or_(cpu, instruction->target);
+            or_(cpu, instruction->source);
             return cpu->prog_count + 1;
         case XOR:
-            xor_(cpu, instruction->target);
+            xor_(cpu, instruction->source);
             return cpu->prog_count + 1;
         case CP:
-            cp(cpu, instruction->target);
+            cp(cpu, instruction->source);
             return cpu->prog_count + 1;
         case INC:
-            inc(cpu, instruction->target);
+            inc(cpu, instruction->source);
             return cpu->prog_count + 1;
         case DEC:
-            dec(cpu, instruction->target);
+            dec(cpu, instruction->source);
             return cpu->prog_count + 1;
         case CCF:
             ccf(cpu);
@@ -129,39 +129,39 @@ uint16_t execute(CPU *cpu, const Instruction *instruction) {
 
         /* Load Instructions */
         case LD_REG:
-            ld_reg(cpu, instruction->ld_target, instruction->ld_source);
+            ld_reg(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 1;
         case LD_D8:
-            ld_d8(cpu, instruction->ld_target);
+            ld_d8(cpu, instruction->target);
             return cpu->prog_count + 2;
         case LD_D16:
-            ld_d16(cpu, instruction->ld_target);
+            ld_d16(cpu, instruction->target);
             return cpu->prog_count + 3;
         case LD_D8_IND:
             ld_d8_ind(cpu);
             return cpu->prog_count + 2;
         case LD_IND:
-            ld_ind(cpu, instruction->ld_target, instruction->ld_source);
+            ld_ind(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 1;
         case LD_ADDR:
-            ld_addr(cpu, instruction->ld_target, instruction->ld_source);
+            ld_addr(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 3;
         case LD_INC:
-            ld_inc(cpu, instruction->ld_target, instruction->ld_source);
+            ld_inc(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 1;
         case LD_DEC:
-            ld_dec(cpu, instruction->ld_target, instruction->ld_source);
+            ld_dec(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 1;
         case LDH_IND:
-            ldh_ind(cpu, instruction->ld_target, instruction->ld_source);
+            ldh_ind(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 2;
         case LDH_ADDR:
-            ldh_addr(cpu, instruction->ld_target, instruction->ld_source);
+            ldh_addr(cpu, instruction->target, instruction->source);
             return cpu->prog_count + 2;
 
         /* Stack Instructions */
         case PUSH:
-            push(cpu, instruction->target);
+            push(cpu, instruction->source);
             return cpu->prog_count + 1;
         case POP:
             pop(cpu, instruction->target);

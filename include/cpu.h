@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include "instructions.h"
+#include "registers.h"
 
 #define MEMORY_SIZE 0xFFFF
 
@@ -51,17 +52,17 @@ void stack_push(CPU *cpu, uint16_t val);
 uint16_t stack_pop(CPU *cpu);
 
 /* Instruction implementations */
-void add(CPU *cpu, enum RegisterName target);
-void addhl(CPU *cpu, enum RegisterName target);
-void adc(CPU *cpu, enum RegisterName target);
-void sub(CPU *cpu, enum RegisterName target);
-void sbc(CPU *cpu, enum RegisterName target);
-void and_(CPU *cpu, enum RegisterName target);
-void or_(CPU *cpu, enum RegisterName target);
-void xor_(CPU *cpu, enum RegisterName target);
-void cp(CPU *cpu, enum RegisterName target);
-void inc(CPU *cpu, enum RegisterName target);
-void dec(CPU *cpu, enum RegisterName target);
+void add(CPU *cpu, enum Operand source);
+void addhl(CPU *cpu, enum Operand source);
+void adc(CPU *cpu, enum Operand source);
+void sub(CPU *cpu, enum Operand source);
+void sbc(CPU *cpu, enum Operand source);
+void and_(CPU *cpu, enum Operand source);
+void or_(CPU *cpu, enum Operand source);
+void xor_(CPU *cpu, enum Operand source);
+void cp(CPU *cpu, enum Operand source);
+void inc(CPU *cpu, enum Operand target);
+void dec(CPU *cpu, enum Operand target);
 void ccf(CPU *cpu);
 void scf(CPU *cpu);
 void rra(CPU *cpu);
@@ -70,36 +71,36 @@ void rrca(CPU *cpu);
 void rlca(CPU *cpu);
 void cpl(CPU *cpu);
 
-void bit(CPU *cpu, uint8_t bit_index, enum RegisterName target);
-void reset(CPU *cpu, uint8_t bit_index, enum RegisterName target);
-void set(CPU *cpu, uint8_t bit_index, enum RegisterName target);
-void srl(CPU *cpu, enum RegisterName target);
-void rr(CPU *cpu, enum RegisterName target);
-void rl(CPU *cpu, enum RegisterName target);
-void rrc(CPU *cpu, enum RegisterName target);
-void rlc(CPU *cpu, enum RegisterName target);
-void sra(CPU *cpu, enum RegisterName target);
-void sla(CPU *cpu, enum RegisterName target);
-void swap(CPU *cpu, enum RegisterName target);
+void bit(CPU *cpu, uint8_t bit_index, enum Operand target);
+void reset(CPU *cpu, uint8_t bit_index, enum Operand target);
+void set(CPU *cpu, uint8_t bit_index, enum Operand target);
+void srl(CPU *cpu, enum Operand target);
+void rr(CPU *cpu, enum Operand target);
+void rl(CPU *cpu, enum Operand target);
+void rrc(CPU *cpu, enum Operand target);
+void rlc(CPU *cpu, enum Operand target);
+void sra(CPU *cpu, enum Operand target);
+void sla(CPU *cpu, enum Operand target);
+void swap(CPU *cpu, enum Operand target);
 
 bool jump_test(const CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jp(CPU *cpu, enum JumpCondition jump_cond);
 uint16_t jphl(CPU *cpu);
 uint16_t jr(CPU *cpu, enum JumpCondition jump_cond);
 
-void ld_reg(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
-void ld_d8(CPU *cpu, enum LoadOperand ld_target);
-void ld_d16(CPU *cpu, enum LoadOperand ld_target);
+void ld_reg(CPU *cpu, enum Operand target, enum Operand source);
+void ld_d8(CPU *cpu, enum Operand target);
+void ld_d16(CPU *cpu, enum Operand target);
 void ld_d8_ind(CPU *cpu);
-void ld_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
-void ld_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
-void ld_inc(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
-void ld_dec(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
-void ldh_ind(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
-void ldh_addr(CPU *cpu, enum LoadOperand ld_target, enum LoadOperand ld_source);
+void ld_ind(CPU *cpu, enum Operand target, enum Operand source);
+void ld_addr(CPU *cpu, enum Operand target, enum Operand source);
+void ld_inc(CPU *cpu, enum Operand target, enum Operand source);
+void ld_dec(CPU *cpu, enum Operand target, enum Operand source);
+void ldh_ind(CPU *cpu, enum Operand target, enum Operand source);
+void ldh_addr(CPU *cpu, enum Operand target, enum Operand source);
 
-void push(CPU *cpu, enum RegisterName target);
-void pop(CPU *cpu, enum RegisterName target);
+void push(CPU *cpu, enum Operand source);
+void pop(CPU *cpu, enum Operand target);
 
 uint16_t call(CPU *cpu, enum JumpCondition jump_cond);
 uint16_t ret(CPU *cpu, enum JumpCondition jump_cond);
